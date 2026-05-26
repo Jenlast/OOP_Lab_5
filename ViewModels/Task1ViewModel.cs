@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -21,8 +23,26 @@ public partial class Task1ViewModel : ViewModelBase
     [ObservableProperty] private bool _isSimulationRunning;
     
     private const double TrackLength = 700;
+    
+    // Масив для зберігання завантажених кадрів
+    private Bitmap[] _horseFrames = new Bitmap[12];
 
-    public Task1ViewModel() { InitializeHorses(5); }
+    public Task1ViewModel() 
+    { 
+        LoadImages();
+        InitializeHorses(5); 
+    }
+
+    private void LoadImages()
+    {
+        // Завантажуємо 12 кадрів (0000 до 0011) з папки Assets
+        for (int i = 0; i < 12; i++)
+        {
+            // Форматуємо число з нулями спереду (наприклад, 0005)
+            string fileName = $"avares://OOP_Lab_5/Assets/Images/Horses/WithoutBorder_{i:D4}.png";
+            _horseFrames[i] = new Bitmap(AssetLoader.Open(new Uri(fileName)));
+        }
+    }
 
     private void InitializeHorses(int count)
     {
@@ -34,9 +54,14 @@ public partial class Task1ViewModel : ViewModelBase
         {
             Horses.Add(new HorseModel
             {
-                Name = $"Кінь {i + 1}", HorseColor = colors[i % colors.Length],
-                BaseSpeed = rnd.Next(5, 11), Coefficient = Math.Round(1.5 + rnd.NextDouble() * 3, 2),
-                PositionX = 0, ViewTop = i * 40 + 20
+                Name = $"Кінь {i + 1}", 
+                HorseColor = colors[i % colors.Length],
+                BaseSpeed = rnd.Next(5, 11), 
+                Coefficient = Math.Round(1.5 + rnd.NextDouble() * 3, 2),
+                PositionX = 0, 
+                ViewTop = i * 60 + 10, // Зробив відстань трохи більшою (60) для картинок
+                AnimationFrames = _horseFrames,
+                CurrentFrame = _horseFrames[0] // Ставимо перший кадр за замовчуванням
             });
         }
     }
