@@ -35,12 +35,22 @@ public partial class Task1ViewModel : ViewModelBase
 
     private void LoadImages()
     {
-        // Завантажуємо 12 кадрів (0000 до 0011) з папки Assets
+        // Отримуємо назву проекту автоматично
+        string assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name!;
+
         for (int i = 0; i < 12; i++)
         {
-            // Форматуємо число з нулями спереду (наприклад, 0005)
-            string fileName = $"avares://OOP_Lab_5/Assets/Images/Horses/WithoutBorder_{i:D4}.png";
-            _horseFrames[i] = new Bitmap(AssetLoader.Open(new Uri(fileName)));
+            string fileName = $"avares://{assemblyName}/Assets/Images/Horses/WithOutBorder_{i:D4}.png";
+            
+            try
+            {
+                // Завантажуємо картинку з пам'яті програми
+                _horseFrames[i] = new Bitmap(AssetLoader.Open(new Uri(fileName)));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ПОМИЛКА] Не вдалося завантажити: {fileName}. Причина: {ex.Message}");
+            }
         }
     }
 

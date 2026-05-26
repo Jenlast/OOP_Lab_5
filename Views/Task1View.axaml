@@ -23,7 +23,7 @@
             
             <!-- Малюємо Трасу на фоні -->
             <Border.Background>
-                <ImageBrush Source="avares://OOP_Lab5/Assets/Images/Background/Track.png" Stretch="Fill"/>
+                <ImageBrush Source="/Assets/Images/Background/Track.png" Stretch="Fill"/>
             </Border.Background>
 
             <ItemsControl ItemsSource="{Binding Horses}">

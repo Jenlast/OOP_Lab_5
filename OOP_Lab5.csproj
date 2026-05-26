@@ -9,8 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
-    <AvaloniaResource Include="Assets\**" />
+    <None Remove="Assets\**" />
+    <None Remove="Assets/**/*" />
+    <Compile Remove="Assets\**" />
+    <Compile Remove="Assets/**/*" />
+    
+    <AvaloniaResource Include="Assets/**/*" />
   </ItemGroup>
 
   <ItemGroup>
