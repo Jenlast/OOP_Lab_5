@@ -1,18 +1,56 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:OOP_Lab5.ViewModels"
+             xmlns:models="using:OOP_Lab5.Models"
              x:Class="OOP_Lab5.Views.Task2View"
              x:DataType="vm:Task2ViewModel">
-    <Grid RowDefinitions="Auto, *">
-        <StackPanel Orientation="Horizontal" Spacing="10" Margin="10">
+    
+    <!-- Додаємо дві колонки: * (для картинки) та 300 пікселів (для таблиці) -->
+    <Grid RowDefinitions="Auto, *" ColumnDefinitions="*, 300">
+        
+        <!-- Верхня панель (розтягується на обидві колонки: Grid.ColumnSpan="2") -->
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="10" Margin="10">
             <Button Command="{Binding AddRandomPointsCommand}" Content="Додати 5 точок"/>
             <Button Command="{Binding ClearPointsCommand}" Content="Очистити"/>
             <CheckBox IsChecked="{Binding UseMultiThreading}" Content="Багатопоточність"/>
-            <ComboBox SelectedIndex="{Binding SelectedMetricIndex}"><ComboBoxItem>Евклідова</ComboBoxItem><ComboBoxItem>Манхеттенська</ComboBoxItem></ComboBox>
+            <ComboBox SelectedIndex="{Binding SelectedMetricIndex}">
+                <ComboBoxItem>Евклідова</ComboBoxItem>
+                <ComboBoxItem>Манхеттенська</ComboBoxItem>
+            </ComboBox>
             <TextBlock Text="{Binding PerformanceInfo}" VerticalAlignment="Center" FontWeight="Bold"/>
         </StackPanel>
-        <Border Grid.Row="1" BorderBrush="Black" BorderThickness="2" Margin="10" Background="Gray">
+
+        <!-- Картинка Вороного (Зліва, Column 0) -->
+        <Border Grid.Row="1" Grid.Column="0" BorderBrush="Black" BorderThickness="2" Margin="10,0,5,10" Background="Gray">
             <Image Source="{Binding VoronoiImage}" Stretch="Fill" />
         </Border>
+
+        <!-- Таблиця Точок (Справа, Column 1) -->
+        <DataGrid Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Points}" 
+                  AutoGenerateColumns="False" Margin="5,0,10,10"
+                  GridLinesVisibility="All" BorderThickness="1" BorderBrush="Gray"
+                  Background="#252525" IsReadOnly="True">
+            <DataGrid.Columns>
+                <!-- Координата X -->
+                <DataGridTextColumn Header="X" Binding="{Binding X}" />
+                
+                <!-- Координата Y -->
+                <DataGridTextColumn Header="Y" Binding="{Binding Y}" />
+                
+                <!-- Візуальний кольоровий квадратик -->
+                <DataGridTemplateColumn Header="Колір">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="models:VoronoiPoint">
+                            <Rectangle Width="20" Height="20" RadiusX="3" RadiusY="3" HorizontalAlignment="Center">
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding RegionColor}"/>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        
     </Grid>
 </UserControl>
