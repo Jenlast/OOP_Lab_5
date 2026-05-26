@@ -1,3 +1,14 @@
 using Avalonia.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace OOP_Lab5.Models;
-public class VoronoiPoint { public double X { get; set; } public double Y { get; set; } public Color RegionColor { get; set; } }
+
+public partial class VoronoiPoint : ObservableObject 
+{ 
+    public double X { get; set; } 
+    public double Y { get; set; } 
+    public Color RegionColor { get; set; }
+    
+    // Нова властивість для зберігання площі (кількості пікселів)
+    [ObservableProperty] private int _areaPixels; 
+}

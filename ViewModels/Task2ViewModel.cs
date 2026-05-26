@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Linq;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -9,6 +11,7 @@ using Avalonia.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OOP_Lab5.Models;
+
 
 namespace OOP_Lab5.ViewModels;
 
@@ -42,6 +45,30 @@ public partial class Task2ViewModel : ViewModelBase
         PerformanceInfo = "Очищено";
     }
 
+    [RelayCommand]
+    private void RemoveSmallestRegions()
+    {
+        if (Points.Count == 0) return;
+
+        // Рахуємо, скільки точок треба видалити (наприклад, 30%). Якщо точок мало, видаляємо хоча б 1.
+        int countToRemove = Math.Max(1, (int)(Points.Count * 0.3));
+        
+        // Щоб випадково не видалити взагалі всі точки:
+        if (countToRemove >= Points.Count) countToRemove = Points.Count - 1;
+
+        // Linq-магія: сортуємо за площею (від найменшої), беремо потрібну кількість
+        var toRemove = Points.OrderBy(p => p.AreaPixels).Take(countToRemove).ToList();
+
+        foreach (var p in toRemove)
+        {
+            Points.Remove(p);
+        }
+
+        // Перемальовуємо екран
+        GenerateVoronoi();
+        PerformanceInfo = $"Видалено {countToRemove} найменших локусів";
+    }
+
     public void GenerateVoronoi()
     {
         if (Points.Count == 0) return;
@@ -49,24 +76,55 @@ public partial class Task2ViewModel : ViewModelBase
         var sw = Stopwatch.StartNew();
         var newImage = new WriteableBitmap(new PixelSize(Width, Height), new Vector(96, 96), PixelFormat.Bgra8888);
 
+        // Створюємо масив лічильників (по одному на кожну точку)
+        int[] pixelCounts = new int[Points.Count]; 
+
         using (var buf = newImage.Lock())
         {
-            if (UseMultiThreading) Parallel.For(0, Height, y => ProcessRow(y, Width, buf, metric));
-            else for (int y = 0; y < Height; y++) ProcessRow(y, Width, buf, metric);
+            // Передаємо масив pixelCounts у ProcessRow
+            if (UseMultiThreading) Parallel.For(0, Height, y => ProcessRow(y, Width, buf, metric, pixelCounts));
+            else for (int y = 0; y < Height; y++) ProcessRow(y, Width, buf, metric, pixelCounts);
             DrawPoints(buf);
         }
+        
+        // Після того, як весь екран намальовано, записуємо результати в точки
+        for (int i = 0; i < Points.Count; i++)
+        {
+            Points[i].AreaPixels = pixelCounts[i];
+        }
+
         sw.Stop();
         VoronoiImage = newImage;
         PerformanceInfo = $"Час: {sw.ElapsedMilliseconds} мс | Потоки: {(UseMultiThreading ? "Багато" : "Один")}";
     }
 
-    private unsafe void ProcessRow(int y, int width, ILockedFramebuffer buf, IDistanceMetric metric)
+    private unsafe void ProcessRow(int y, int width, ILockedFramebuffer buf, IDistanceMetric metric, int[] pixelCounts)
     {
         uint* ptr = (uint*)buf.Address + y * (buf.RowBytes / 4);
         for (int x = 0; x < width; x++)
         {
-            double minDist = double.MaxValue; Color closestColor = Colors.Gray;
-            foreach (var p in Points) { double dist = metric.Calculate(x, y, p.X, p.Y); if (dist < minDist) { minDist = dist; closestColor = p.RegionColor; } }
+            double minDist = double.MaxValue; 
+            Color closestColor = Colors.Gray;
+            int closestIndex = -1; // Зберігаємо індекс найближчої точки
+
+            // Проходимо циклом for, щоб мати доступ до індексу [i]
+            for (int i = 0; i < Points.Count; i++)
+            {
+                double dist = metric.Calculate(x, y, Points[i].X, Points[i].Y); 
+                if (dist < minDist) 
+                { 
+                    minDist = dist; 
+                    closestColor = Points[i].RegionColor; 
+                    closestIndex = i; // Запам'ятовуємо, чий це піксель
+                } 
+            }
+            
+            // Безпечно додаємо +1 до лічильника пікселів для знайденої точки
+            if (closestIndex != -1)
+            {
+                Interlocked.Increment(ref pixelCounts[closestIndex]);
+            }
+
             *ptr++ = (uint)((255 << 24) | (closestColor.R << 16) | (closestColor.G << 8) | closestColor.B);
         }
     }

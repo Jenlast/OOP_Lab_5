@@ -12,6 +12,7 @@
        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="10" Margin="10">
            <Button Command="{Binding AddRandomPointsCommand}" Content="Додати 5 точок"/>
            <Button Command="{Binding ClearPointsCommand}" Content="Очистити"/>
+           <Button Command="{Binding RemoveSmallestRegionsCommand}" Content="-30% Найменших"/>
            <CheckBox IsChecked="{Binding UseMultiThreading}" Content="Багатопоточність"/>
            <ComboBox SelectedIndex="{Binding SelectedMetricIndex}">
                <ComboBoxItem>Евклідова</ComboBoxItem>
@@ -31,14 +32,13 @@
                  GridLinesVisibility="All" BorderThickness="1" BorderBrush="Gray"
                  Background="#252525" IsReadOnly="True">
            <DataGrid.Columns>
-               <!-- Координата X -->
-               <DataGridTextColumn Header="X" Binding="{Binding X}" />
-              
-               <!-- Координата Y -->
-               <DataGridTextColumn Header="Y" Binding="{Binding Y}" />
-              
-               <!-- Візуальний кольоровий квадратик -->
-               <DataGridTemplateColumn Header="Колір">
+            <DataGridTextColumn Header="X" Binding="{Binding X}" />
+            <DataGridTextColumn Header="Y" Binding="{Binding Y}" />
+            
+            <!-- ДОДАНА КОЛОНКА -->
+            <DataGridTextColumn Header="Площа (px)" Binding="{Binding AreaPixels}" />
+            
+            <DataGridTemplateColumn Header="Колір">
                    <DataGridTemplateColumn.CellTemplate>
                        <DataTemplate x:DataType="models:VoronoiPoint">
                            <Rectangle Width="20" Height="20" RadiusX="3" RadiusY="3" HorizontalAlignment="Center">
