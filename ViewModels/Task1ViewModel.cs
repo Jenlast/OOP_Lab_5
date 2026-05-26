@@ -22,7 +22,7 @@ public partial class Task1ViewModel : ViewModelBase
     [ObservableProperty] private HorseModel? _selectedHorseForBet;
     [ObservableProperty] private bool _isSimulationRunning;
     
-    private const double TrackLength = 700;
+    private const double TrackLength = 600;
     
     // Масив для зберігання завантажених кадрів
     private Bitmap[] _horseFrames = new Bitmap[12];
@@ -69,7 +69,7 @@ public partial class Task1ViewModel : ViewModelBase
                 BaseSpeed = rnd.Next(5, 11), 
                 Coefficient = Math.Round(1.5 + rnd.NextDouble() * 3, 2),
                 PositionX = 0, 
-                ViewTop = i * 60 + 10, // Зробив відстань трохи більшою (60) для картинок
+                ViewTop = i * 60 + 120,
                 AnimationFrames = _horseFrames,
                 CurrentFrame = _horseFrames[0] // Ставимо перший кадр за замовчуванням
             });
