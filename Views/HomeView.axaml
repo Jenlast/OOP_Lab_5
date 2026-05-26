@@ -5,49 +5,70 @@
              x:DataType="vm:HomeViewModel">
     
     <UserControl.Styles>
-        <!-- Стиль для великих квадратних кнопок (БЕЗ ТІНІ ТУТ) -->
         <Style Selector="Button.HomeCard">
             <Setter Property="Background" Value="#252525"/>
-            <Setter Property="Width" Value="250"/>
-            <Setter Property="Height" Value="250"/>
-            <Setter Property="CornerRadius" Value="20"/>
+            <Setter Property="Width" Value="280"/> 
+            <Setter Property="Height" Value="260"/>
+            <Setter Property="Padding" Value="0"/> 
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
         <Style Selector="Button.HomeCard:pointerover /template/ ContentPresenter">
-            <!-- Ефект при наведенні -->
             <Setter Property="Background" Value="#3F51B5"/>
         </Style>
     </UserControl.Styles>
 
-    <Grid Background="#121212">
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="40">
-            
-            <TextBlock Text="Виберіть лабораторну роботу" FontSize="36" FontWeight="Heavy" Foreground="White" HorizontalAlignment="Center"/>
-
-            <WrapPanel HorizontalAlignment="Center">
+    <!-- Додано ScrollViewer, щоб можна було гортати вниз, якщо завдань стане дуже багато -->
+    <ScrollViewer>
+        <Grid Background="#121212" Margin="0, 40">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="40">
                 
-                <!-- Картка 1: Іподром -->
-                <Border CornerRadius="20" Margin="20" BoxShadow="0 10 20 0 #40000000">
-                    <Button Classes="HomeCard" Command="{Binding GoToTask1Command}">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="15">
-                            <TextBlock Text="🏇" FontSize="80" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Кінні скачки" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Асинхронність та потоки" FontSize="14" Foreground="LightGray" HorizontalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-                </Border>
+                <TextBlock Text="Виберіть лабораторну роботу" FontSize="36" FontWeight="Heavy" Foreground="White" HorizontalAlignment="Center"/>
 
-                <!-- Картка 2: Вороний -->
-                <Border CornerRadius="20" Margin="20" BoxShadow="0 10 20 0 #40000000">
-                    <Button Classes="HomeCard" Command="{Binding GoToTask2Command}">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="15">
-                            <TextBlock Text="🎨" FontSize="80" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Діаграма Вороного" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Алгоритми та Графіка" FontSize="14" Foreground="LightGray" HorizontalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-                </Border>
-            </WrapPanel>
-        </StackPanel>
-    </Grid>
+                <!-- ТАБЛИЦЯ НА 2 КОЛОНКИ -->
+                <UniformGrid Columns="2" HorizontalAlignment="Center">
+                    
+                    <!-- Картка 1: Іподром -->
+                    <Border CornerRadius="20" Margin="15" BoxShadow="0 10 20 0 #40000000" ClipToBounds="True">
+                        <Button Classes="HomeCard" Command="{Binding GoToTask1Command}">
+                            <Grid RowDefinitions="150, *">
+                                <Image Grid.Row="0" Source="/Assets/horse_racing.png" Stretch="UniformToFill"/>
+                                <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="5">
+                                    <TextBlock Text="Кінні скачки" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Асинхронність та потоки" FontSize="14" Foreground="LightGray" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                        </Button>
+                    </Border>
+
+                    <!-- Картка 2: Вороний -->
+                    <Border CornerRadius="20" Margin="15" BoxShadow="0 10 20 0 #40000000" ClipToBounds="True">
+                        <Button Classes="HomeCard" Command="{Binding GoToTask2Command}">
+                            <Grid RowDefinitions="150, *">
+                                <Image Grid.Row="0" Source="/Assets/voronoi.png" Stretch="UniformToFill"/>
+                                <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="5">
+                                    <TextBlock Text="Діаграма Вороного" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Алгоритми та Графіка" FontSize="14" Foreground="LightGray" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                        </Button>
+                    </Border>
+
+                    <!-- Картка 3: Казино (Рулетка) -->
+                    <Border CornerRadius="20" Margin="15" BoxShadow="0 10 20 0 #40000000" ClipToBounds="True">
+                        <Button Classes="HomeCard" Command="{Binding GoToTask3Command}">
+                            <Grid RowDefinitions="150, *">
+                                <Image Grid.Row="0" Source="/Assets/roulette.png" Stretch="UniformToFill"/>
+                                <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="5">
+                                    <TextBlock Text="Казино (Рулетка)" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                        </Button>
+                    </Border>
+
+                </UniformGrid>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

@@ -20,4 +20,6 @@ public partial class HomeViewModel : ViewModelBase
     [RelayCommand]
     private void GoToTask2() => _navigateAction(new Task2ViewModel());
 
+    [RelayCommand]
+    private void GoToTask3() => _navigateAction(new Task3ViewModel());
 }
