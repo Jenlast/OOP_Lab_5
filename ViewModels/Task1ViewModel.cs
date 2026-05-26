@@ -214,6 +214,13 @@ public partial class Task1ViewModel : ViewModelBase
         IsSimulationRunning = false;
         
         if (betHorse.Rank == 1) Balance += (int)(BetAmount * betHorse.Coefficient);
+
+        var rand = new Random();
+        foreach (var h in Horses)
+        {
+            double newBase = 1.0 +(h.Rank * 0.4);
+            h.Coefficient = Math.Round(newBase + (rand.NextDouble() * 0.5), 2);
+        }
     }
 
     [RelayCommand]

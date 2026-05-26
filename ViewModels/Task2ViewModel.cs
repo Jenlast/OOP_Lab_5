@@ -106,6 +106,11 @@ public partial class Task2ViewModel : ViewModelBase
    {
        if (Points.Count == 0) return;
        IDistanceMetric metric = SelectedMetricIndex == 0 ? new EuclideanMetric() : new ManhattanMetric();
+
+       GC.Collect();
+       long memoryBefore = GC.GetTotalMemory(true);
+       var currentProcess = Process.GetCurrentProcess();
+       TimeSpan cpuTimeBefore = currentProcess.TotalProcessorTime;
        var sw = Stopwatch.StartNew();
        var newImage = new WriteableBitmap(new PixelSize(Width, Height), new Vector(96, 96), PixelFormat.Bgra8888);
 
@@ -127,8 +132,13 @@ public partial class Task2ViewModel : ViewModelBase
        }
 
        sw.Stop();
+       TimeSpan cpuTimeAfter = currentProcess.TotalProcessorTime;
+       long memoryAfter = GC.GetTotalMemory(false);
+
+       double cpuMs = (cpuTimeAfter - cpuTimeBefore).TotalMilliseconds;
+       double memUsedMb = Math.Max(0,(memoryAfter - memoryBefore) / (1024.0 * 1024.0));
        VoronoiImage = newImage;
-       PerformanceInfo = $"Час: {sw.ElapsedMilliseconds} мс | Потоки: {(UseMultiThreading ? "Багато" : "Один")}";
+       PerformanceInfo = $"Час: {sw.ElapsedMilliseconds} мс | CPU: {cpuMs:F1} мс | Пам'ять: {memUsedMb:F2} МБ";
    }
 
    private unsafe void ProcessRow(int y, int width, ILockedFramebuffer buf, IDistanceMetric metric, int[] pixelCounts)
