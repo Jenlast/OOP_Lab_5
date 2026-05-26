@@ -23,11 +23,16 @@ public partial class Task1ViewModel : ViewModelBase
     [ObservableProperty] private HorseModel? _selectedHorseForBet;
     [ObservableProperty] private bool _isSimulationRunning;
     [ObservableProperty] private int _horseCount = 5;
+    [ObservableProperty] private int _cameraHorseIndex = -1;
+    [ObservableProperty] private string _cameraButtonText = "Камера: Загальна";
+
+    [ObservableProperty] private double _finishLineViewPositionX = 660; 
     
     // НОВА ВЛАСТИВІСТЬ ДЛЯ ТЕКСТУ ПОМИЛКИ
     [ObservableProperty] private string _errorMessage = string.Empty;
     
-    private const double TrackLength = 600;
+    private const double TrackLength = 3000;
+    private const double ScreenWidth = 700; 
     private Bitmap[] _horseFrames = new Bitmap[12];
 
     public Task1ViewModel() 
@@ -148,10 +153,36 @@ public partial class Task1ViewModel : ViewModelBase
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                foreach (var h in Horses.Where(h => !h.IsFinished))
+                double cameraOffsetX = 0;
+
+                if (CameraHorseIndex != -1 && CameraHorseIndex < Horses.Count)
                 {
-                    h.LiveTimeDisplay = $"{(int)currentElapsed.TotalSeconds}.{currentElapsed.Milliseconds:D3} сек";
+                    var targetHorse = Horses[CameraHorseIndex];
+                    cameraOffsetX = targetHorse.PositionX - 150; 
+                    
+                    if (cameraOffsetX < 0) cameraOffsetX = 0; 
                 }
+
+                foreach (var h in Horses)
+                {
+                    if (CameraHorseIndex == -1)
+                    {
+                        h.ViewPositionX = (h.PositionX / TrackLength) * ScreenWidth;
+                    }
+                    else 
+                    {
+                        h.ViewPositionX = h.PositionX - cameraOffsetX;
+                    }
+
+                    if (!h.IsFinished)
+                    {
+                        h.LiveTimeDisplay = $"{(int)currentElapsed.TotalSeconds}.{currentElapsed.Milliseconds:D3} сек";
+                    }
+                }
+
+                FinishLineViewPositionX = CameraHorseIndex == -1 
+                    ? ScreenWidth 
+                    : TrackLength - cameraOffsetX;
 
                 var newlyFinished = Horses.Where(h => h.IsFinished && h.Rank == 0).OrderBy(h => h.FinishTime).ToList();
                 foreach (var h in newlyFinished) 
@@ -183,5 +214,19 @@ public partial class Task1ViewModel : ViewModelBase
         IsSimulationRunning = false;
         
         if (betHorse.Rank == 1) Balance += (int)(BetAmount * betHorse.Coefficient);
+    }
+
+    [RelayCommand]
+    private void SwitchCamera()
+    {
+        CameraHorseIndex++;
+        if (CameraHorseIndex >= HorseCount) 
+        {
+            CameraHorseIndex = -1; // Повертаємось на загальний вигляд
+        }
+
+        CameraButtonText = CameraHorseIndex == -1 
+            ? "Камера: Загальна" 
+            : $"Камера: {Horses[CameraHorseIndex].Name}";
     }
 }

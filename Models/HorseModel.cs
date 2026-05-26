@@ -17,6 +17,7 @@ public partial class HorseModel : ObservableObject
     
     [ObservableProperty] private Bitmap? _currentFrame; 
     [ObservableProperty] private double _positionX;
+    [ObservableProperty] private double _viewPositionX;
     [ObservableProperty] private double _viewTop;
     [ObservableProperty] private int _rank;
     [ObservableProperty] private TimeSpan _finishTime;
