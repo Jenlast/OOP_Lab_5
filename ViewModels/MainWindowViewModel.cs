@@ -6,16 +6,24 @@ namespace OOP_Lab5.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsBackButtonVisible))]
     private ViewModelBase _currentViewModel;
+
+    public bool IsBackButtonVisible => CurrentViewModel is not HomeViewModel;
 
     public MainWindowViewModel()
     {
-        CurrentViewModel = new Task1ViewModel(); // Відкриваємо Коней за замовчуванням
+        _currentViewModel = new HomeViewModel(NavigateTo);
+    }
+
+    private void NavigateTo(ViewModelBase viewModel)
+    {
+        CurrentViewModel = viewModel;
     }
 
     [RelayCommand]
-    private void SwitchToTask1() => CurrentViewModel = new Task1ViewModel();
-
-    [RelayCommand]
-    private void SwitchToTask2() => CurrentViewModel = new Task2ViewModel();
+    private void GoHome()
+    {
+        CurrentViewModel = new HomeViewModel(NavigateTo);
+    }
 }

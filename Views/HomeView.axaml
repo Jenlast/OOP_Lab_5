@@ -1,0 +1,53 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:OOP_Lab5.ViewModels"
+             x:Class="OOP_Lab5.Views.HomeView"
+             x:DataType="vm:HomeViewModel">
+    
+    <UserControl.Styles>
+        <!-- Стиль для великих квадратних кнопок (БЕЗ ТІНІ ТУТ) -->
+        <Style Selector="Button.HomeCard">
+            <Setter Property="Background" Value="#252525"/>
+            <Setter Property="Width" Value="250"/>
+            <Setter Property="Height" Value="250"/>
+            <Setter Property="CornerRadius" Value="20"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.HomeCard:pointerover /template/ ContentPresenter">
+            <!-- Ефект при наведенні -->
+            <Setter Property="Background" Value="#3F51B5"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid Background="#121212">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="40">
+            
+            <TextBlock Text="Виберіть лабораторну роботу" FontSize="36" FontWeight="Heavy" Foreground="White" HorizontalAlignment="Center"/>
+
+            <WrapPanel HorizontalAlignment="Center">
+                
+                <!-- Картка 1: Іподром -->
+                <Border CornerRadius="20" Margin="20" BoxShadow="0 10 20 0 #40000000">
+                    <Button Classes="HomeCard" Command="{Binding GoToTask1Command}">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="15">
+                            <TextBlock Text="🏇" FontSize="80" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Кінні скачки" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Асинхронність та потоки" FontSize="14" Foreground="LightGray" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </Border>
+
+                <!-- Картка 2: Вороний -->
+                <Border CornerRadius="20" Margin="20" BoxShadow="0 10 20 0 #40000000">
+                    <Button Classes="HomeCard" Command="{Binding GoToTask2Command}">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="15">
+                            <TextBlock Text="🎨" FontSize="80" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Діаграма Вороного" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Алгоритми та Графіка" FontSize="14" Foreground="LightGray" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </Border>
+            </WrapPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

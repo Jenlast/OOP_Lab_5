@@ -198,12 +198,11 @@ public partial class Task1ViewModel : ViewModelBase
                     .ThenByDescending(h => h.PositionX)      
                     .ToList();
 
-                for (int i = 0; i < currentOrder.Count; i++)
+                // НОВИЙ НАДІЙНИЙ КОД:
+                LeaderboardHorses.Clear();
+                foreach (var h in currentOrder)
                 {
-                    if (LeaderboardHorses[i] != currentOrder[i])
-                    {
-                        LeaderboardHorses[i] = currentOrder[i];
-                    }
+                    LeaderboardHorses.Add(h);
                 }
             });
             
