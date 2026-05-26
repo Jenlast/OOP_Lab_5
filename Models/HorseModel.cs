@@ -15,27 +15,15 @@ public partial class HorseModel : ObservableObject
     public Bitmap[] AnimationFrames { get; set; } = Array.Empty<Bitmap>();
     private int _currentFrameIndex = 0;
     
-    [ObservableProperty] private Bitmap? _currentFrame;
+    [ObservableProperty] private Bitmap? _currentFrame; 
     [ObservableProperty] private double _positionX;
     [ObservableProperty] private double _viewTop;
     [ObservableProperty] private int _rank;
     [ObservableProperty] private TimeSpan _finishTime;
     [ObservableProperty] private bool _isFinished;
 
-    // Зручна властивість для виведення в таблицю
-    public string FormattedFinishTime 
-    {
-        get
-        {
-            if (!IsFinished) return "В процесі...";
-            // Формат: Секунди.Мілісекунди (напр. 5.432 сек)
-            return $"{(int)FinishTime.TotalSeconds}.{FinishTime.Milliseconds:D3} сек";
-        }
-    }
-
-    // Тригер: коли змінюється час або статус фінішу, оновлюємо текст в таблиці
-    partial void OnFinishTimeChanged(TimeSpan value) => OnPropertyChanged(nameof(FormattedFinishTime));
-    partial void OnIsFinishedChanged(bool value) => OnPropertyChanged(nameof(FormattedFinishTime));
+    // НОВА ВЛАСТИВІСТЬ: Для живого відображення часу в таблиці
+    [ObservableProperty] private string _liveTimeDisplay = "0.000 сек";
 
     public void Move(Random rnd)
     {

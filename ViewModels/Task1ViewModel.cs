@@ -16,12 +16,16 @@ namespace OOP_Lab5.ViewModels;
 public partial class Task1ViewModel : ViewModelBase
 {
     public ObservableCollection<HorseModel> Horses { get; set; } = new();
+    public ObservableCollection<HorseModel> LeaderboardHorses { get; set; } = new();
     
     [ObservableProperty] private int _balance = 1000;
     [ObservableProperty] private int _betAmount = 100;
     [ObservableProperty] private HorseModel? _selectedHorseForBet;
     [ObservableProperty] private bool _isSimulationRunning;
     [ObservableProperty] private int _horseCount = 5;
+    
+    // НОВА ВЛАСТИВІСТЬ ДЛЯ ТЕКСТУ ПОМИЛКИ
+    [ObservableProperty] private string _errorMessage = string.Empty;
     
     private const double TrackLength = 600;
     private Bitmap[] _horseFrames = new Bitmap[12];
@@ -32,14 +36,20 @@ public partial class Task1ViewModel : ViewModelBase
         InitializeHorses(HorseCount); 
     }
 
+    // Автоматично прибираємо помилку, якщо гравець змінив кількість коней
     partial void OnHorseCountChanged(int value)
     {
         if (!IsSimulationRunning)
         {
             InitializeHorses(value);
             SelectedHorseForBet = null;
+            ErrorMessage = string.Empty; 
         }
     }
+
+    // Автоматично прибираємо помилку, якщо гравець обрав коня або змінив ставку
+    partial void OnSelectedHorseForBetChanged(HorseModel? value) => ErrorMessage = string.Empty;
+    partial void OnBetAmountChanged(int value) => ErrorMessage = string.Empty;
 
     private void LoadImages()
     {
@@ -55,6 +65,7 @@ public partial class Task1ViewModel : ViewModelBase
     private void InitializeHorses(int count)
     {
         Horses.Clear();
+        LeaderboardHorses.Clear(); 
         var rnd = new Random();
         
         var colors = new[] { 
@@ -68,7 +79,7 @@ public partial class Task1ViewModel : ViewModelBase
 
         for (int i = 0; i < count; i++)
         {
-            Horses.Add(new HorseModel
+            var horse = new HorseModel
             {
                 Name = $"Кінь {i + 1}", 
                 HorseColor = colors[i % colors.Length],
@@ -77,56 +88,91 @@ public partial class Task1ViewModel : ViewModelBase
                 PositionX = 0, 
                 ViewTop = startY + (i * step), 
                 AnimationFrames = _horseFrames,
-                CurrentFrame = _horseFrames[0]
-            });
+                CurrentFrame = _horseFrames[0],
+                LiveTimeDisplay = "0.000 сек"
+            };
+            Horses.Add(horse);
+            LeaderboardHorses.Add(horse);
         }
     }
 
     [RelayCommand]
     private async Task StartSimulationAsync()
     {
+        if (IsSimulationRunning) return;
+
+        ErrorMessage = string.Empty; // Очищаємо старі помилки перед перевіркою
+
+        int selectedIndex = SelectedHorseForBet != null ? Horses.IndexOf(SelectedHorseForBet) : -1;
+        
+        // ПЕРЕВІРКА 1: Чи обраний кінь
+        if (selectedIndex == -1)
+        {
+            ErrorMessage = "Оберіть фаворита для ставки!";
+            return;
+        }
+
+        // ПЕРЕВІРКА 2: Чи вистачає грошей
+        if (Balance < BetAmount)
+        {
+            ErrorMessage = "Недостатньо коштів на балансі!";
+            return;
+        }
+
+        InitializeHorses(HorseCount);
+        SelectedHorseForBet = Horses[selectedIndex];
         var betHorse = SelectedHorseForBet;
-        if (IsSimulationRunning || betHorse == null) return;
 
         Balance -= BetAmount;
         IsSimulationRunning = true;
-        
-        // Скидання параметрів перед новим забігом
-        foreach (var h in Horses) 
-        { 
-            h.PositionX = 0; 
-            h.IsFinished = false; 
-            h.Rank = 0; 
-            h.FinishTime = TimeSpan.Zero; 
-        }
 
         var rnd = new Random();
         var sw = Stopwatch.StartNew();
         int rankCounter = 1;
 
-        // Цикл бігу (поки хоч один не добіг)
         while (Horses.Any(h => !h.IsFinished))
         {
             var tasks = Horses.Where(h => !h.IsFinished).Select(horse => Task.Run(() =>
             {
                 horse.Move(rnd);
-                // Фіксація фінішу
                 if (horse.PositionX >= TrackLength) { 
-                    horse.FinishTime = sw.Elapsed; // Точний запис часу
+                    horse.IsFinished = true;
                     horse.PositionX = TrackLength; 
-                    horse.IsFinished = true; 
+                    horse.FinishTime = sw.Elapsed; 
+                    horse.LiveTimeDisplay = $"{(int)horse.FinishTime.TotalSeconds}.{horse.FinishTime.Milliseconds:D3} сек";
                 }
             })).ToArray();
 
             await Task.WhenAll(tasks);
+            var currentElapsed = sw.Elapsed;
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                // Присвоюємо місця (ранг) тим, хто щойно фінішував, сортуючи їх за мілісекундами
-                var newlyFinished = Horses.Where(h => h.IsFinished && h.Rank == 0).OrderBy(h => h.FinishTime);
+                foreach (var h in Horses.Where(h => !h.IsFinished))
+                {
+                    h.LiveTimeDisplay = $"{(int)currentElapsed.TotalSeconds}.{currentElapsed.Milliseconds:D3} сек";
+                }
+
+                var newlyFinished = Horses.Where(h => h.IsFinished && h.Rank == 0).OrderBy(h => h.FinishTime).ToList();
                 foreach (var h in newlyFinished) 
                 {
-                    h.Rank = rankCounter++;
+                    var tiedHorse = Horses.FirstOrDefault(other => other.Rank > 0 && Math.Abs((other.FinishTime - h.FinishTime).TotalMilliseconds) <= 20);
+                    if (tiedHorse != null) { h.Rank = tiedHorse.Rank; rankCounter++; }
+                    else { h.Rank = rankCounter++; }
+                }
+
+                var currentOrder = Horses
+                    .OrderByDescending(h => h.IsFinished)    
+                    .ThenBy(h => h.IsFinished ? h.Rank : 0)  
+                    .ThenByDescending(h => h.PositionX)      
+                    .ToList();
+
+                for (int i = 0; i < currentOrder.Count; i++)
+                {
+                    if (LeaderboardHorses[i] != currentOrder[i])
+                    {
+                        LeaderboardHorses[i] = currentOrder[i];
+                    }
                 }
             });
             
@@ -134,29 +180,8 @@ public partial class Task1ViewModel : ViewModelBase
         }
 
         sw.Stop();
-
-        // СОРТУВАННЯ ТАБЛИЦІ В КІНЦІ ЗАБІГУ
-        // Перебудовуємо список один раз, щоб відобразити від 1 до останнього місця
-        var sortedList = Horses.OrderBy(h => h.Rank).ToList();
-        var tempSelected = SelectedHorseForBet;
-        
-        Horses.Clear();
-        foreach (var h in sortedList) 
-        {
-            Horses.Add(h);
-        }
-        SelectedHorseForBet = tempSelected;
-
         IsSimulationRunning = false;
+        
         if (betHorse.Rank == 1) Balance += (int)(BetAmount * betHorse.Coefficient);
-    }
-
-    [RelayCommand]
-    private void ResetGame()
-    {
-        Balance = 1000;
-        BetAmount = 100;
-        InitializeHorses(HorseCount);
-        SelectedHorseForBet = null;
     }
 }

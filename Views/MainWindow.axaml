@@ -10,8 +10,8 @@
         <!-- Верхня панель навігації -->
         <Border Grid.Row="0" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}" Padding="10">
             <StackPanel Orientation="Horizontal" Spacing="15" HorizontalAlignment="Center">
-                <Button Command="{Binding SwitchToTask1Command}" Content="🏇 Завдання 1 (Іподром)" Width="200" HorizontalContentAlignment="Center"/>
-                <Button Command="{Binding SwitchToTask2Command}" Content="💠 Завдання 2 (Діаграма Вороного)" Width="230" HorizontalContentAlignment="Center"/>
+                <Button Command="{Binding SwitchToTask1Command}" Content="Завдання 1 (Іподром)" Width="200" HorizontalContentAlignment="Center"/>
+                <Button Command="{Binding SwitchToTask2Command}" Content="Завдання 2 (Діаграма Вороного)" Width="230" HorizontalContentAlignment="Center"/>
             </StackPanel>
         </Border>
         

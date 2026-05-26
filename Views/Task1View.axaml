@@ -21,7 +21,7 @@
                 BoxShadow="0 4 10 0 #20000000"> 
             
             <StackPanel Spacing="15">
-                <TextBlock Text="🐎 Управління" FontWeight="Bold" FontSize="22" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                <TextBlock Text="Управління" FontWeight="Bold" FontSize="22" HorizontalAlignment="Center" Margin="0,0,0,5"/>
 
                 <Border Background="#154CAF50" BorderBrush="#4CAF50" BorderThickness="2" CornerRadius="8" Padding="10">
                     <TextBlock Text="{Binding Balance, StringFormat='Баланс: {0} $'}" 
@@ -59,6 +59,13 @@
 
                 <Rectangle Height="1" Fill="{DynamicResource SystemControlBoundsBaseLowBrush}" Margin="0,10"/>
 
+                <TextBlock Text="{Binding ErrorMessage}" 
+                           Foreground="#FF5252" 
+                           FontWeight="SemiBold" 
+                           TextWrapping="Wrap" 
+                           TextAlignment="Center" 
+                           Margin="0,0,0,5"/>
+
                 <Button Command="{Binding StartSimulationCommand}" IsEnabled="{Binding !IsSimulationRunning}" 
                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="45" CornerRadius="8">
                     <Button.Styles>
@@ -67,21 +74,7 @@
                         <Style Selector="Button:disabled /template/ ContentPresenter"><Setter Property="Background" Value="Gray"/></Style>
                     </Button.Styles>
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="🏁" FontSize="16"/>
                         <TextBlock Text="Запустити забіг!" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Button>
-
-                <Button Command="{Binding ResetGameCommand}" IsEnabled="{Binding !IsSimulationRunning}" 
-                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="40" CornerRadius="8">
-                    <Button.Styles>
-                        <Style Selector="Button"><Setter Property="Background" Value="#E53935"/><Setter Property="Foreground" Value="White"/></Style>
-                        <Style Selector="Button:pointerover /template/ ContentPresenter"><Setter Property="Background" Value="#C62828"/></Style>
-                        <Style Selector="Button:disabled /template/ ContentPresenter"><Setter Property="Background" Value="Gray"/></Style>
-                    </Button.Styles>
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="🔄" FontSize="16"/>
-                        <TextBlock Text="Скинути гру" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
             </StackPanel>
@@ -145,16 +138,15 @@
                 Background="{DynamicResource SystemRegionBrush}" 
                 ClipToBounds="True">
             
-            <DataGrid ItemsSource="{Binding Horses}" AutoGenerateColumns="False" Margin="5"
+            <DataGrid ItemsSource="{Binding LeaderboardHorses}" AutoGenerateColumns="False" Margin="5"
                       CanUserReorderColumns="False" CanUserResizeColumns="True" CanUserSortColumns="False" 
                       IsReadOnly="True" GridLinesVisibility="All" BorderThickness="0">
                 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="🏅 Місце" Binding="{Binding Rank}" Width="80"/>
+                    <DataGridTextColumn Header="Місце" Binding="{Binding Rank}" Width="80"/>
                     <DataGridTextColumn Header="Ім'я коня" Binding="{Binding Name}" Width="*"/>
                     <DataGridTextColumn Header="Коеф." Binding="{Binding Coefficient, StringFormat='x{0}'}" Width="80"/>
-                    
-                    <DataGridTextColumn Header="⏱ Час фінішу" Binding="{Binding FormattedFinishTime}" Width="150"/>
+                    <DataGridTextColumn Header="⏱ Час фінішу" Binding="{Binding LiveTimeDisplay}" Width="150"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
