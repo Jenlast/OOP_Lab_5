@@ -1,56 +1,94 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-            xmlns:vm="using:OOP_Lab5.ViewModels"
-            xmlns:models="using:OOP_Lab5.Models"
-            x:Class="OOP_Lab5.Views.Task2View"
-            x:DataType="vm:Task2ViewModel">
-  
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+           xmlns:vm="using:OOP_Lab5.ViewModels"
+           xmlns:models="using:OOP_Lab5.Models"
+           x:Class="OOP_Lab5.Views.Task2View"
+           x:DataType="vm:Task2ViewModel">
    <!-- Додаємо дві колонки: * (для картинки) та 300 пікселів (для таблиці) -->
-   <Grid RowDefinitions="Auto, *" ColumnDefinitions="*, 300">
-      
-       <!-- Верхня панель (розтягується на обидві колонки: Grid.ColumnSpan="2") -->
-       <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="10" Margin="10">
-           <Button Command="{Binding AddRandomPointsCommand}" Content="Додати 5 точок"/>
-           <Button Command="{Binding ClearPointsCommand}" Content="Очистити"/>
-           <Button Command="{Binding RemoveSmallestRegionsCommand}" Content="-30% Найменших"/>
-           <CheckBox IsChecked="{Binding UseMultiThreading}" Content="Багатопоточність"/>
-           <ComboBox SelectedIndex="{Binding SelectedMetricIndex}">
-               <ComboBoxItem>Евклідова</ComboBoxItem>
-               <ComboBoxItem>Манхеттенська</ComboBoxItem>
-           </ComboBox>
-           <TextBlock Text="{Binding PerformanceInfo}" VerticalAlignment="Center" FontWeight="Bold"/>
+  <Grid RowDefinitions="Auto, *" ColumnDefinitions="*, 300">
+    
+      <!-- Верхня панель (розтягується на обидві колонки: Grid.ColumnSpan="2") -->
+       <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Spacing="10" Margin="10">
+          
+           <!-- Перший рядок: Управління -->
+           <StackPanel Orientation="Horizontal" Spacing="10">
+              
+               <!-- Блок генерації з полем вводу -->
+               <Border Background="#33000000"
+                   Padding="5,2"
+                   CornerRadius="5">
+              
+                   <StackPanel Orientation="Horizontal" Spacing="5">
+                      
+                       <TextBlock Text="Точок:"
+                               VerticalAlignment="Center"
+                               FontWeight="SemiBold"/>
+
+                       <NumericUpDown Value="{Binding PointsToAddCount}"
+                                   Minimum="1"
+                                   Maximum="1000"
+                                   Width="110"
+                                   FormatString="0"
+                                   VerticalAlignment="Center"/>
+
+                       <Button Command="{Binding AddRandomPointsCommand}"
+                               Content="Згенерувати"
+                               Background="#2196F3"
+                               Foreground="White"
+                               FontWeight="Bold"/>
+                              
+                   </StackPanel>
+               </Border>
+
+               <Button Command="{Binding RemoveSmallestRegionsCommand}" Content="-30% Найменших"/>
+               <Button Command="{Binding ClearPointsCommand}" Content="Очистити"/>
+               <CheckBox IsChecked="{Binding UseMultiThreading}" Content="Багатопоточність" VerticalAlignment="Center"/>
+               <ComboBox SelectedIndex="{Binding SelectedMetricIndex}" VerticalAlignment="Center">
+                   <ComboBoxItem>Евклідова</ComboBoxItem>
+                   <ComboBoxItem>Манхеттенська</ComboBoxItem>
+               </ComboBox>
+           </StackPanel>
+
+           <!-- Другий рядок: Інформація та Помилки -->
+           <StackPanel Orientation="Horizontal" Spacing="20">
+               <!-- Текст продуктивності -->
+               <TextBlock Text="{Binding PerformanceInfo}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#4CAF50"/>
+               <!-- Текст помилки (Світиться червоним) -->
+               <TextBlock Text="{Binding ErrorMessage}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#FF5252"/>
+           </StackPanel>
+
        </StackPanel>
 
-       <!-- Картинка Вороного (Зліва, Column 0) -->
-       <Border Grid.Row="1" Grid.Column="0" BorderBrush="Black" BorderThickness="2" Margin="10,0,5,10" Background="Gray">
-           <Image Source="{Binding VoronoiImage}" Stretch="Fill" PointerPressed="OnImagePointerPressed" />
-       </Border>
+      <!-- Картинка Вороного (Зліва, Column 0) -->
+      <Border Grid.Row="1" Grid.Column="0" BorderBrush="Black" BorderThickness="2" Margin="10,0,5,10" Background="Gray">
+          <Image Source="{Binding VoronoiImage}" Stretch="Fill" PointerPressed="OnImagePointerPressed" />
+      </Border>
 
-       <!-- Таблиця Точок (Справа, Column 1) -->
-       <DataGrid Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Points}"
-                 AutoGenerateColumns="False" Margin="5,0,10,10"
-                 GridLinesVisibility="All" BorderThickness="1" BorderBrush="Gray"
-                 Background="#252525" IsReadOnly="True">
-           <DataGrid.Columns>
-            <DataGridTextColumn Header="X" Binding="{Binding X}" />
-            <DataGridTextColumn Header="Y" Binding="{Binding Y}" />
-            
-            <!-- ДОДАНА КОЛОНКА -->
-            <DataGridTextColumn Header="Площа (px)" Binding="{Binding AreaPixels}" />
-            
-            <DataGridTemplateColumn Header="Колір">
-                   <DataGridTemplateColumn.CellTemplate>
-                       <DataTemplate x:DataType="models:VoronoiPoint">
-                           <Rectangle Width="20" Height="20" RadiusX="3" RadiusY="3" HorizontalAlignment="Center">
-                               <Rectangle.Fill>
-                                   <SolidColorBrush Color="{Binding RegionColor}"/>
-                               </Rectangle.Fill>
-                           </Rectangle>
-                       </DataTemplate>
-                   </DataGridTemplateColumn.CellTemplate>
-               </DataGridTemplateColumn>
-           </DataGrid.Columns>
-       </DataGrid>
-      
-   </Grid>
+      <!-- Таблиця Точок (Справа, Column 1) -->
+      <DataGrid Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Points}"
+                AutoGenerateColumns="False" Margin="5,0,10,10"
+                GridLinesVisibility="All" BorderThickness="1" BorderBrush="Gray"
+                Background="#252525" IsReadOnly="True">
+          <DataGrid.Columns>
+           <DataGridTextColumn Header="X" Binding="{Binding X}" />
+           <DataGridTextColumn Header="Y" Binding="{Binding Y}" />
+          
+           <!-- ДОДАНА КОЛОНКА -->
+           <DataGridTextColumn Header="Площа (px)" Binding="{Binding AreaPixels}" />
+          
+           <DataGridTemplateColumn Header="Колір">
+                  <DataGridTemplateColumn.CellTemplate>
+                      <DataTemplate x:DataType="models:VoronoiPoint">
+                          <Rectangle Width="20" Height="20" RadiusX="3" RadiusY="3" HorizontalAlignment="Center">
+                              <Rectangle.Fill>
+                                  <SolidColorBrush Color="{Binding RegionColor}"/>
+                              </Rectangle.Fill>
+                          </Rectangle>
+                      </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+          </DataGrid.Columns>
+      </DataGrid>
+    
+  </Grid>
 </UserControl>

@@ -17,127 +17,160 @@ namespace OOP_Lab5.ViewModels;
 
 public partial class Task2ViewModel : ViewModelBase
 {
-    public ObservableCollection<VoronoiPoint> Points { get; set; } = new();
-    
-    [ObservableProperty] private WriteableBitmap? _voronoiImage;
-    [ObservableProperty] private bool _useMultiThreading = true;
-    [ObservableProperty] private int _selectedMetricIndex = 0;
-    [ObservableProperty] private string _performanceInfo = "";
+   public ObservableCollection<VoronoiPoint> Points { get; set; } = new();
+  
+   [ObservableProperty] private WriteableBitmap? _voronoiImage;
+   [ObservableProperty] private bool _useMultiThreading = true;
+   [ObservableProperty] private int _selectedMetricIndex = 0;
+   [ObservableProperty] private string _performanceInfo = "";
+   [ObservableProperty] private int _pointsToAddCount = 50; // За замовчуванням пропонуємо 50
+   [ObservableProperty] private string _errorMessage = string.Empty;
 
-    private const int Width = 800; private const int Height = 600;
+   partial void OnPointsToAddCountChanged(int value)
+   {
+       ErrorMessage = string.Empty;
+   }
 
-    public Task2ViewModel() { VoronoiImage = new WriteableBitmap(new PixelSize(Width, Height), new Vector(96, 96), PixelFormat.Bgra8888); }
-    partial void OnSelectedMetricIndexChanged(int value) => GenerateVoronoi();
+   private const int Width = 800; private const int Height = 600;
 
-    [RelayCommand]
-    private void AddRandomPoints()
-    {
-        var rnd = new Random();
-        for (int i = 0; i < 5; i++) Points.Add(new VoronoiPoint { X = rnd.Next(10, Width - 10), Y = rnd.Next(10, Height - 10), RegionColor = Color.FromRgb((byte)rnd.Next(50, 256), (byte)rnd.Next(50, 256), (byte)rnd.Next(50, 256)) });
-        GenerateVoronoi();
-    }
+   public Task2ViewModel() { VoronoiImage = new WriteableBitmap(new PixelSize(Width, Height), new Vector(96, 96), PixelFormat.Bgra8888); }
+   partial void OnSelectedMetricIndexChanged(int value) => GenerateVoronoi();
 
-    [RelayCommand]
-    private void ClearPoints()
-    {
-        Points.Clear();
-        VoronoiImage = new WriteableBitmap(new PixelSize(Width, Height), new Vector(96, 96), PixelFormat.Bgra8888);
-        PerformanceInfo = "Очищено";
-    }
+   [RelayCommand]
+   private void AddRandomPoints()
+   {
+       // 1. Перевіряємо ліміти
+       if (PointsToAddCount < 1)
+       {
+           ErrorMessage = "Помилка: Кількість точок має бути більшою за 0!";
+           return;
+       }
+       if (PointsToAddCount > 300)
+       {
+           ErrorMessage = $"Помилка: Забагато точок! Максимум 300 за раз. (Ви ввели {PointsToAddCount})";
+           return;
+       }
 
-    [RelayCommand]
-    private void RemoveSmallestRegions()
-    {
-        if (Points.Count == 0) return;
+       // 2. Якщо все добре - очищаємо помилку
+       ErrorMessage = string.Empty;
 
-        // Рахуємо, скільки точок треба видалити (наприклад, 30%). Якщо точок мало, видаляємо хоча б 1.
-        int countToRemove = Math.Max(1, (int)(Points.Count * 0.3));
-        
-        // Щоб випадково не видалити взагалі всі точки:
-        if (countToRemove >= Points.Count) countToRemove = Points.Count - 1;
+       // 3. Генеруємо вказану кількість точок
+       var rnd = new Random();
+       for (int i = 0; i < PointsToAddCount; i++)
+       {
+           Points.Add(new VoronoiPoint
+           {
+               X = rnd.Next(10, Width - 10),
+               Y = rnd.Next(10, Height - 10),
+               RegionColor = Color.FromRgb((byte)rnd.Next(50, 256), (byte)rnd.Next(50, 256), (byte)rnd.Next(50, 256))
+           });
+       }
+      
+       // 4. Перемальовуємо
+       GenerateVoronoi();
+   }
 
-        // Linq-магія: сортуємо за площею (від найменшої), беремо потрібну кількість
-        var toRemove = Points.OrderBy(p => p.AreaPixels).Take(countToRemove).ToList();
+   [RelayCommand]
+   private void ClearPoints()
+   {
+       Points.Clear();
+       VoronoiImage = new WriteableBitmap(new PixelSize(Width, Height), new Vector(96, 96), PixelFormat.Bgra8888);
+       PerformanceInfo = "Очищено";
+   }
 
-        foreach (var p in toRemove)
-        {
-            Points.Remove(p);
-        }
+   [RelayCommand]
+   private void RemoveSmallestRegions()
+   {
+       if (Points.Count == 0) return;
 
-        // Перемальовуємо екран
-        GenerateVoronoi();
-        PerformanceInfo = $"Видалено {countToRemove} найменших локусів";
-    }
+       // Рахуємо, скільки точок треба видалити (наприклад, 30%). Якщо точок мало, видаляємо хоча б 1.
+       int countToRemove = Math.Max(1, (int)(Points.Count * 0.3));
+      
+       // Щоб випадково не видалити взагалі всі точки:
+       if (countToRemove >= Points.Count) countToRemove = Points.Count - 1;
 
-    public void GenerateVoronoi()
-    {
-        if (Points.Count == 0) return;
-        IDistanceMetric metric = SelectedMetricIndex == 0 ? new EuclideanMetric() : new ManhattanMetric();
-        var sw = Stopwatch.StartNew();
-        var newImage = new WriteableBitmap(new PixelSize(Width, Height), new Vector(96, 96), PixelFormat.Bgra8888);
+       // Linq-магія: сортуємо за площею (від найменшої), беремо потрібну кількість
+       var toRemove = Points.OrderBy(p => p.AreaPixels).Take(countToRemove).ToList();
 
-        // Створюємо масив лічильників (по одному на кожну точку)
-        int[] pixelCounts = new int[Points.Count]; 
+       foreach (var p in toRemove)
+       {
+           Points.Remove(p);
+       }
 
-        using (var buf = newImage.Lock())
-        {
-            // Передаємо масив pixelCounts у ProcessRow
-            if (UseMultiThreading) Parallel.For(0, Height, y => ProcessRow(y, Width, buf, metric, pixelCounts));
-            else for (int y = 0; y < Height; y++) ProcessRow(y, Width, buf, metric, pixelCounts);
-            DrawPoints(buf);
-        }
-        
-        // Після того, як весь екран намальовано, записуємо результати в точки
-        for (int i = 0; i < Points.Count; i++)
-        {
-            Points[i].AreaPixels = pixelCounts[i];
-        }
+       // Перемальовуємо екран
+       GenerateVoronoi();
+       PerformanceInfo = $"Видалено {countToRemove} найменших локусів";
+   }
 
-        sw.Stop();
-        VoronoiImage = newImage;
-        PerformanceInfo = $"Час: {sw.ElapsedMilliseconds} мс | Потоки: {(UseMultiThreading ? "Багато" : "Один")}";
-    }
+   public void GenerateVoronoi()
+   {
+       if (Points.Count == 0) return;
+       IDistanceMetric metric = SelectedMetricIndex == 0 ? new EuclideanMetric() : new ManhattanMetric();
+       var sw = Stopwatch.StartNew();
+       var newImage = new WriteableBitmap(new PixelSize(Width, Height), new Vector(96, 96), PixelFormat.Bgra8888);
 
-    private unsafe void ProcessRow(int y, int width, ILockedFramebuffer buf, IDistanceMetric metric, int[] pixelCounts)
-    {
-        uint* ptr = (uint*)buf.Address + y * (buf.RowBytes / 4);
-        for (int x = 0; x < width; x++)
-        {
-            double minDist = double.MaxValue; 
-            Color closestColor = Colors.Gray;
-            int closestIndex = -1; // Зберігаємо індекс найближчої точки
+       // Створюємо масив лічильників (по одному на кожну точку)
+       int[] pixelCounts = new int[Points.Count];
 
-            // Проходимо циклом for, щоб мати доступ до індексу [i]
-            for (int i = 0; i < Points.Count; i++)
-            {
-                double dist = metric.Calculate(x, y, Points[i].X, Points[i].Y); 
-                if (dist < minDist) 
-                { 
-                    minDist = dist; 
-                    closestColor = Points[i].RegionColor; 
-                    closestIndex = i; // Запам'ятовуємо, чий це піксель
-                } 
-            }
-            
-            // Безпечно додаємо +1 до лічильника пікселів для знайденої точки
-            if (closestIndex != -1)
-            {
-                Interlocked.Increment(ref pixelCounts[closestIndex]);
-            }
+       using (var buf = newImage.Lock())
+       {
+           // Передаємо масив pixelCounts у ProcessRow
+           if (UseMultiThreading) Parallel.For(0, Height, y => ProcessRow(y, Width, buf, metric, pixelCounts));
+           else for (int y = 0; y < Height; y++) ProcessRow(y, Width, buf, metric, pixelCounts);
+           DrawPoints(buf);
+       }
+      
+       // Після того, як весь екран намальовано, записуємо результати в точки
+       for (int i = 0; i < Points.Count; i++)
+       {
+           Points[i].AreaPixels = pixelCounts[i];
+       }
 
-            *ptr++ = (uint)((255 << 24) | (closestColor.R << 16) | (closestColor.G << 8) | closestColor.B);
-        }
-    }
+       sw.Stop();
+       VoronoiImage = newImage;
+       PerformanceInfo = $"Час: {sw.ElapsedMilliseconds} мс | Потоки: {(UseMultiThreading ? "Багато" : "Один")}";
+   }
 
-    private unsafe void DrawPoints(ILockedFramebuffer buf)
-    {
-        uint* basePtr = (uint*)buf.Address;
-        foreach (var p in Points)
-            for (int dy = -2; dy <= 2; dy++)
-                for (int dx = -2; dx <= 2; dx++)
-                {
-                    int nx = (int)p.X + dx, ny = (int)p.Y + dy;
-                    if (nx >= 0 && nx < Width && ny >= 0 && ny < Height) *(basePtr + (ny * (buf.RowBytes / 4)) + nx) = 0xFF000000;
-                }
-    }
+   private unsafe void ProcessRow(int y, int width, ILockedFramebuffer buf, IDistanceMetric metric, int[] pixelCounts)
+   {
+       uint* ptr = (uint*)buf.Address + y * (buf.RowBytes / 4);
+       for (int x = 0; x < width; x++)
+       {
+           double minDist = double.MaxValue;
+           Color closestColor = Colors.Gray;
+           int closestIndex = -1; // Зберігаємо індекс найближчої точки
+
+           // Проходимо циклом for, щоб мати доступ до індексу [i]
+           for (int i = 0; i < Points.Count; i++)
+           {
+               double dist = metric.Calculate(x, y, Points[i].X, Points[i].Y);
+               if (dist < minDist)
+               {
+                   minDist = dist;
+                   closestColor = Points[i].RegionColor;
+                   closestIndex = i; // Запам'ятовуємо, чий це піксель
+               }
+           }
+          
+           // Безпечно додаємо +1 до лічильника пікселів для знайденої точки
+           if (closestIndex != -1)
+           {
+               Interlocked.Increment(ref pixelCounts[closestIndex]);
+           }
+
+           *ptr++ = (uint)((255 << 24) | (closestColor.R << 16) | (closestColor.G << 8) | closestColor.B);
+       }
+   }
+
+   private unsafe void DrawPoints(ILockedFramebuffer buf)
+   {
+       uint* basePtr = (uint*)buf.Address;
+       foreach (var p in Points)
+           for (int dy = -2; dy <= 2; dy++)
+               for (int dx = -2; dx <= 2; dx++)
+               {
+                   int nx = (int)p.X + dx, ny = (int)p.Y + dy;
+                   if (nx >= 0 && nx < Width && ny >= 0 && ny < Height) *(basePtr + (ny * (buf.RowBytes / 4)) + nx) = 0xFF000000;
+               }
+   }
 }
