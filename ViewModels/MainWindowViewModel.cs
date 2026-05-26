@@ -1,4 +1,4 @@
-﻿namespace OOP_Lab_5.ViewModels;
+﻿namespace OOP_Lab5.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {

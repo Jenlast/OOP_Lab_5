@@ -1,7 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace OOP_Lab_5.ViewModels;
+namespace OOP_Lab5.ViewModels;
 
-public abstract class ViewModelBase : ObservableObject
-{
-}
+public class ViewModelBase : ObservableObject { }

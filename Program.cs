@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using System;
 
-namespace OOP_Lab_5;
+namespace OOP_Lab5;
 
 sealed class Program
 {

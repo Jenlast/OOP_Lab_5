@@ -1,20 +1,14 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:OOP_Lab_5.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="OOP_Lab_5.Views.MainWindow"
+        xmlns:vm="using:OOP_Lab5.ViewModels"
+        x:Class="OOP_Lab5.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="OOP_Lab_5">
-
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
-
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
+        Title="Lab 5 - Avalonia SOLID MVVM" Width="1000" Height="700">
+    <Grid RowDefinitions="Auto, *">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" Margin="10">
+            <Button Command="{Binding SwitchToTask1Command}" Content="Завдання 1 (Коні)"/>
+            <Button Command="{Binding SwitchToTask2Command}" Content="Завдання 2 (Вороний)"/>
+        </StackPanel>
+        <TransitioningContentControl Grid.Row="1" Content="{Binding CurrentViewModel}" />
+    </Grid>
 </Window>
