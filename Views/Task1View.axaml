@@ -5,65 +5,49 @@
              x:Class="OOP_Lab5.Views.Task1View"
              x:DataType="vm:Task1ViewModel">
     
-    <Grid RowDefinitions="Auto, *, 200" ColumnDefinitions="280, *" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+    <!-- ГОЛОВНА СІТКА: Рядок 0 (Траса), Рядок 1 (Таблиця висотою 220px). Колонки: Ліва панель (280px), Права частина (*) -->
+    <Grid RowDefinitions="*, 220" ColumnDefinitions="280, *" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
         
         <!-- ========================================== -->
-        <!-- ЛІВА ПАНЕЛЬ КЕРУВАННЯ (Ставки)             -->
+        <!-- ЛІВА ПАНЕЛЬ КЕРУВАННЯ                      -->
+        <!-- Grid.RowSpan="2" означає, що вона займає всю висоту зліва -->
         <!-- ========================================== -->
-        <Border Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" 
+        <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" 
                 Margin="15" Padding="20"
                 Background="{DynamicResource SystemRegionBrush}"
                 CornerRadius="10"
                 BorderBrush="{DynamicResource SystemControlBoundsBaseLowBrush}"
                 BorderThickness="1"
-                BoxShadow="0 4 10 0 #20000000"> <!-- Легка тінь для об'єму -->
+                BoxShadow="0 4 10 0 #20000000"> 
             
             <StackPanel Spacing="15">
-                <!-- Заголовок -->
-                <TextBlock Text="🐎 Управління" 
-                           FontWeight="Bold" 
-                           FontSize="22" 
-                           HorizontalAlignment="Center" 
-                           Margin="0,0,0,10"/>
+                <TextBlock Text="🐎 Управління" FontWeight="Bold" FontSize="22" HorizontalAlignment="Center" Margin="0,0,0,5"/>
 
-                <!-- Блок Балансу -->
-                <Border Background="#154CAF50" 
-                        BorderBrush="#4CAF50" 
-                        BorderThickness="2" 
-                        CornerRadius="8" 
-                        Padding="10">
+                <Border Background="#154CAF50" BorderBrush="#4CAF50" BorderThickness="2" CornerRadius="8" Padding="10">
                     <TextBlock Text="{Binding Balance, StringFormat='Баланс: {0} $'}" 
-                               FontSize="20" 
-                               FontWeight="Heavy" 
-                               Foreground="#4CAF50" 
-                               HorizontalAlignment="Center"/>
+                               FontSize="20" FontWeight="Heavy" Foreground="#4CAF50" HorizontalAlignment="Center"/>
                 </Border>
 
-                <!-- Введення суми ставки -->
-                <StackPanel Spacing="5" Margin="0,10,0,0">
+                <StackPanel Spacing="5">
                     <TextBlock Text="Сума ставки ($):" FontWeight="Medium" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-                    <NumericUpDown Value="{Binding BetAmount}" 
-                                   Minimum="10" 
-                                   Increment="10" 
-                                   HorizontalAlignment="Stretch"
-                                   FormatString="0"/>
+                    <NumericUpDown Value="{Binding BetAmount}" Minimum="10" Increment="10" HorizontalAlignment="Stretch" FormatString="0"/>
                 </StackPanel>
 
-                <!-- Вибір коня -->
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Кількість коней (2-10):" FontWeight="Medium" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                    <NumericUpDown Value="{Binding HorseCount}" Minimum="2" Maximum="10" Increment="1" HorizontalAlignment="Stretch" FormatString="0"
+                                   IsEnabled="{Binding !IsSimulationRunning}"/>
+                </StackPanel>
+
                 <StackPanel Spacing="5">
                     <TextBlock Text="Оберіть свого фаворита:" FontWeight="Medium" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-                    <ComboBox ItemsSource="{Binding Horses}" 
-                              SelectedItem="{Binding SelectedHorseForBet}" 
-                              HorizontalAlignment="Stretch"
-                              PlaceholderText="Клікніть для вибору...">
+                    <ComboBox ItemsSource="{Binding Horses}" SelectedItem="{Binding SelectedHorseForBet}" 
+                              HorizontalAlignment="Stretch" PlaceholderText="Клікніть для вибору...">
                         <ComboBox.ItemTemplate>
                             <DataTemplate x:DataType="models:HorseModel">
                                 <StackPanel Orientation="Horizontal" Spacing="10">
-                                    <!-- Кольоровий індикатор коня у списку -->
                                     <Border Width="14" Height="14" CornerRadius="7" VerticalAlignment="Center">
-                                        <Border.Background>
-                                            <SolidColorBrush Color="{Binding HorseColor}"/>
-                                        </Border.Background>
+                                        <Border.Background><SolidColorBrush Color="{Binding HorseColor}"/></Border.Background>
                                     </Border>
                                     <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontWeight="SemiBold"/>
                                     <TextBlock Text="{Binding Coefficient, StringFormat='(x{0})'}" Foreground="Gray" VerticalAlignment="Center"/>
@@ -73,93 +57,64 @@
                     </ComboBox>
                 </StackPanel>
 
-                <!-- Розділювач (щоб притиснути кнопку нижче, якщо екран великий, або просто дати простір) -->
-                <Rectangle Height="1" Fill="{DynamicResource SystemControlBoundsBaseLowBrush}" Margin="0,15"/>
+                <Rectangle Height="1" Fill="{DynamicResource SystemControlBoundsBaseLowBrush}" Margin="0,10"/>
 
-                <!-- Кнопка Старт -->
-                <Button Command="{Binding StartSimulationCommand}" 
-                        IsEnabled="{Binding !IsSimulationRunning}" 
-                        HorizontalAlignment="Stretch" 
-                        HorizontalContentAlignment="Center"
-                        VerticalContentAlignment="Center"
-                        Height="50" 
-                        CornerRadius="8">
-                    <!-- Задаємо кольори кнопки через стиль прямо тут -->
+                <Button Command="{Binding StartSimulationCommand}" IsEnabled="{Binding !IsSimulationRunning}" 
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="45" CornerRadius="8">
                     <Button.Styles>
-                        <Style Selector="Button">
-                            <Setter Property="Background" Value="#008CBA"/>
-                            <Setter Property="Foreground" Value="White"/>
-                        </Style>
-                        <Style Selector="Button:pointerover /template/ ContentPresenter">
-                            <Setter Property="Background" Value="#007399"/>
-                        </Style>
-                        <Style Selector="Button:disabled /template/ ContentPresenter">
-                            <Setter Property="Background" Value="Gray"/>
-                        </Style>
+                        <Style Selector="Button"><Setter Property="Background" Value="#008CBA"/><Setter Property="Foreground" Value="White"/></Style>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter"><Setter Property="Background" Value="#007399"/></Style>
+                        <Style Selector="Button:disabled /template/ ContentPresenter"><Setter Property="Background" Value="Gray"/></Style>
                     </Button.Styles>
-                    
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="🏁" FontSize="18"/>
+                        <TextBlock Text="🏁" FontSize="16"/>
                         <TextBlock Text="Запустити забіг!" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Command="{Binding ResetGameCommand}" IsEnabled="{Binding !IsSimulationRunning}" 
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="40" CornerRadius="8">
+                    <Button.Styles>
+                        <Style Selector="Button"><Setter Property="Background" Value="#E53935"/><Setter Property="Foreground" Value="White"/></Style>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter"><Setter Property="Background" Value="#C62828"/></Style>
+                        <Style Selector="Button:disabled /template/ ContentPresenter"><Setter Property="Background" Value="Gray"/></Style>
+                    </Button.Styles>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="🔄" FontSize="16"/>
+                        <TextBlock Text="Скинути гру" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
             </StackPanel>
         </Border>
 
         <!-- ========================================== -->
-        <!-- ПРАВА ЧАСТИНА (Траса)                      -->
+        <!-- ПРАВА ЧАСТИНА - ТРАСА (Верхній рядок)      -->
         <!-- ========================================== -->
-        <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" 
+        <Border Grid.Row="0" Grid.Column="1" 
                 BorderBrush="{DynamicResource SystemControlBoundsBaseMediumBrush}" 
-                BorderThickness="2" 
-                CornerRadius="8" 
-                Margin="0,15,15,15"
-                ClipToBounds="True"> 
+                BorderThickness="2" CornerRadius="8" ClipToBounds="True" Margin="0,15,15,10"> 
             
             <Border.Background>
                 <ImageBrush Source="/Assets/Images/Background/Track.png" Stretch="Fill"/>
             </Border.Background>
 
-            <!-- Додаємо Grid, щоб накласти лінію фінішу і коней шарами -->
             <Grid>
-                
                 <!-- ЛІНІЯ ФІНІШУ -->
                 <Canvas>
-                    <!-- Напис "ФІНІШ" -->
-                    <TextBlock Text="ФІНІШ" Canvas.Left="665" Canvas.Top="80" 
-                               FontWeight="Heavy" Foreground="White" FontSize="14" 
-                               LetterSpacing="2"/>
-                    
-                    <!-- Червоний стовпчик -->
-                    <Border Canvas.Left="680" Canvas.Top="100" Width="10" Height="30" 
-                            Background="#D32F2F" CornerRadius="3" 
-                            BorderBrush="White" BorderThickness="1"/>
-                    
-                    <!-- Пунктирна лінія на траві -->
-                    <!-- Починається з висоти 130 (трохи вище першого коня) і йде до самого низу (800) -->
-                    <Line StartPoint="685, 130" EndPoint="685, 800" 
-                          Stroke="White" StrokeThickness="5" StrokeDashArray="3,3" 
-                          Opacity="0.8"/>
+                    <TextBlock Text="ФІНІШ" Canvas.Left="665" Canvas.Top="80" FontWeight="Heavy" Foreground="White" FontSize="14" LetterSpacing="2"/>
+                    <Border Canvas.Left="680" Canvas.Top="100" Width="10" Height="30" Background="#D32F2F" CornerRadius="3" BorderBrush="White" BorderThickness="1"/>
+                    <Line StartPoint="685, 130" EndPoint="685, 800" Stroke="White" StrokeThickness="5" StrokeDashArray="3,3" Opacity="0.8"/>
                 </Canvas>
 
                 <!-- КОНІ -->
                 <ItemsControl ItemsSource="{Binding Horses}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate><Canvas/></ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><Canvas/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="models:HorseModel">
                             <Grid Width="100" Height="60">
-                                <!-- САМ КІНЬ -->
                                 <Image Source="{Binding CurrentFrame}" Stretch="Uniform" />
-                                
-                                <!-- Плашка з назвою -->
-                                <Border VerticalAlignment="Bottom" HorizontalAlignment="Center" 
-                                        CornerRadius="4" Margin="0,0,0,-15" Padding="6,2"
-                                        BoxShadow="0 2 4 0 #40000000">
-                                    <Border.Background>
-                                        <SolidColorBrush Color="{Binding HorseColor}"/>
-                                    </Border.Background>
+                                <Border VerticalAlignment="Bottom" HorizontalAlignment="Center" CornerRadius="4" Margin="0,0,0,-15" Padding="6,2" BoxShadow="0 2 4 0 #40000000">
+                                    <Border.Background><SolidColorBrush Color="{Binding HorseColor}"/></Border.Background>
                                     <TextBlock Text="{Binding Name}" FontSize="11" FontWeight="Bold" Foreground="White"/>
                                 </Border>
                             </Grid>
@@ -169,6 +124,11 @@
                         <Style Selector="ContentPresenter" x:DataType="models:HorseModel">
                             <Setter Property="Canvas.Left" Value="{Binding PositionX}"/>
                             <Setter Property="Canvas.Top" Value="{Binding ViewTop}"/>
+                            <Setter Property="Transitions">
+                                <Transitions>
+                                    <DoubleTransition Property="Canvas.Left" Duration="0:0:0.05"/>
+                                </Transitions>
+                            </Setter>
                         </Style>
                     </ItemsControl.Styles>
                 </ItemsControl>
@@ -176,29 +136,25 @@
         </Border>
 
         <!-- ========================================== -->
-        <!-- ТАБЛИЦЯ РЕЗУЛЬТАТІВ                        -->
+        <!-- ПРАВА ЧАСТИНА - ТАБЛИЦЯ (Нижній рядок)     -->
         <!-- ========================================== -->
-        <Border Grid.Row="2" Grid.Column="1" 
-                Margin="0,0,15,15" 
-                CornerRadius="8" 
+        <Border Grid.Row="1" Grid.Column="1" 
+                CornerRadius="8" Margin="0,0,15,15"
                 BorderBrush="{DynamicResource SystemControlBoundsBaseLowBrush}" 
-                BorderThickness="1"
-                Background="{DynamicResource SystemRegionBrush}">
+                BorderThickness="1" 
+                Background="{DynamicResource SystemRegionBrush}" 
+                ClipToBounds="True">
             
-            <DataGrid ItemsSource="{Binding Horses}" 
-                      AutoGenerateColumns="False" 
-                      Margin="5"
-                      CanUserReorderColumns="False"
-                      CanUserResizeColumns="True"
-                      CanUserSortColumns="False"
-                      IsReadOnly="True"
-                      GridLinesVisibility="All"
-                      BorderThickness="0">
+            <DataGrid ItemsSource="{Binding Horses}" AutoGenerateColumns="False" Margin="5"
+                      CanUserReorderColumns="False" CanUserResizeColumns="True" CanUserSortColumns="False" 
+                      IsReadOnly="True" GridLinesVisibility="All" BorderThickness="0">
+                
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="🏅 Місце" Binding="{Binding Rank}" Width="100"/>
+                    <DataGridTextColumn Header="🏅 Місце" Binding="{Binding Rank}" Width="80"/>
                     <DataGridTextColumn Header="Ім'я коня" Binding="{Binding Name}" Width="*"/>
-                    <DataGridTextColumn Header="Коеф." Binding="{Binding Coefficient, StringFormat='x{0}'}" Width="100"/>
-                    <DataGridTextColumn Header="Час фінішу" Binding="{Binding FinishTime, StringFormat='{}{0:ss\\.ff} сек'}" Width="150"/>
+                    <DataGridTextColumn Header="Коеф." Binding="{Binding Coefficient, StringFormat='x{0}'}" Width="80"/>
+                    
+                    <DataGridTextColumn Header="⏱ Час фінішу" Binding="{Binding FormattedFinishTime}" Width="150"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
