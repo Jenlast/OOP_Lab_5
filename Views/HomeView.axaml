@@ -36,7 +36,6 @@
                                 <Image Grid.Row="0" Source="/Assets/horse_racing.png" Stretch="UniformToFill"/>
                                 <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="5">
                                     <TextBlock Text="Кінні скачки" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Асинхронність та потоки" FontSize="14" Foreground="LightGray" HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Grid>
                         </Button>
@@ -49,7 +48,6 @@
                                 <Image Grid.Row="0" Source="/Assets/voronoi.png" Stretch="UniformToFill"/>
                                 <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="5">
                                     <TextBlock Text="Діаграма Вороного" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Алгоритми та Графіка" FontSize="14" Foreground="LightGray" HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Grid>
                         </Button>
@@ -62,6 +60,17 @@
                                 <Image Grid.Row="0" Source="/Assets/roulette.png" Stretch="UniformToFill"/>
                                 <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="5">
                                     <TextBlock Text="Казино (Рулетка)" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                        </Button>
+                    </Border>
+
+                    <Border CornerRadius="20" Margin="15" BoxShadow="0 10 20 0 #40000000" ClipToBounds="True">
+                        <Button Classes="HomeCard" Command="{Binding GoToTask4Command}">
+                            <Grid RowDefinitions="150, *">
+                                <Image Grid.Row="0" Source="/Assets/plinko.png" Stretch="UniformToFill"/>
+                                <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="5">
+                                    <TextBlock Text="Гра Плінко (Plinko)" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Grid>
                         </Button>

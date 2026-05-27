@@ -1,0 +1,112 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:OOP_Lab5.ViewModels"
+             xmlns:models="using:OOP_Lab5.Models"
+             x:Class="OOP_Lab5.Views.Task4View"
+             x:DataType="vm:Task4ViewModel"
+             Background="#121212">
+
+    <Grid RowDefinitions="Auto, *">
+        
+        <!-- ВЕРХНЯ ПАНЕЛЬ УПРАВЛІННЯ -->
+        <Border Grid.Row="0" Background="#1E1E1E" Padding="20" BorderBrush="#333" BorderThickness="0,0,0,2">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20">
+                <TextBlock Text="БАЛАНС:" FontSize="24" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding Balance, StringFormat='{}{0:0.00} $'}" FontSize="24" FontWeight="Heavy" Foreground="#4CAF50" VerticalAlignment="Center"/>
+                
+                <TextBlock Text="Ставка:" FontSize="18" Foreground="LightGray" VerticalAlignment="Center" Margin="20,0,0,0"/>
+                <NumericUpDown Value="{Binding BetAmount}" Minimum="1" Maximum="1000" Increment="5" FormatString="0" Width="100" VerticalAlignment="Center"/>
+                
+                <!-- НОВЕ: ВПАДНЕ МЕНЮ ДЛЯ ВИБОРУ РИЗИКУ -->
+                <TextBlock Text="Ризик:" FontSize="18" Foreground="LightGray" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                <ComboBox SelectedIndex="{Binding SelectedRiskIndex}" Width="120" VerticalAlignment="Center" Cursor="Hand">
+                    <ComboBoxItem>Низький</ComboBoxItem>
+                    <ComboBoxItem>Середній</ComboBoxItem>
+                    <ComboBoxItem>Високий</ComboBoxItem>
+                </ComboBox>
+                
+                <Button Command="{Binding DropBallCommand}" Content="КИНУТИ КУЛЬКУ" 
+                        Background="#E91E63" Foreground="White" FontWeight="Bold" FontSize="18" Padding="20,10" Cursor="Hand" Margin="20,0,0,0"/>
+                
+                <TextBlock Text="{Binding GameMessage}" FontSize="18" Foreground="Yellow" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ІГРОВЕ ПОЛЕ PLINKO -->
+        <Viewbox Grid.Row="1" Stretch="Uniform" Margin="20">
+            <!-- Замість Canvas використовуємо Grid для шарів, а Canvas буде всередині кожного ItemsControl -->
+            <Grid Width="800" Height="700">
+                
+                <!-- 1. МАЛЮЄМО КІЛОЧКИ (ЦВЯШКИ) -->
+                <ItemsControl ItemsSource="{Binding Pegs}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><Canvas/></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    
+                    <ItemsControl.Styles>
+                        <!-- ПРАВИЛЬНЕ ПОЗИЦІОНУВАННЯ ДЛЯ AVALONIA 11 -->
+                        <Style Selector="ContentPresenter" x:DataType="models:PlinkoPeg">
+                            <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                            <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                        </Style>
+                    </ItemsControl.Styles>
+                    
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:PlinkoPeg">
+                            <Ellipse Width="10" Height="10" Fill="White" Margin="-5,-5,0,0"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- 2. МАЛЮЄМО СЛОТИ З МНОЖНИКАМИ ВНИЗУ -->
+                <ItemsControl ItemsSource="{Binding Slots}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><Canvas/></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.Styles>
+                        <Style Selector="ContentPresenter" x:DataType="models:PlinkoSlot">
+                            <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                            <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                        </Style>
+                    </ItemsControl.Styles>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:PlinkoSlot">
+                            <Border Width="36" Height="40" Background="{Binding ColorHex}" CornerRadius="4"
+                                    BorderBrush="#222" BorderThickness="1" Margin="-18,0,0,0">
+                                <TextBlock Text="{Binding MultiplierText}" Foreground="Black" FontWeight="Bold" FontSize="11" 
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- 3. МАЛЮЄМО КУЛЬКИ (Оновлюються анімацією) -->
+                <ItemsControl ItemsSource="{Binding Balls}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><Canvas/></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.Styles>
+                        <Style Selector="ContentPresenter" x:DataType="models:PlinkoBall">
+                            <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                            <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                        </Style>
+                    </ItemsControl.Styles>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:PlinkoBall">
+                            <Ellipse Width="16" Height="16" Fill="#FF1493" Stroke="White" StrokeThickness="2" Margin="-8,-8,0,0">
+                                <Ellipse.Effect>
+                                    <DropShadowEffect BlurRadius="10" Color="#FF1493" OffsetX="0" OffsetY="0"/>
+                                </Ellipse.Effect>
+                            </Ellipse>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+            </Grid>
+        </Viewbox>
+    </Grid>
+</UserControl>
