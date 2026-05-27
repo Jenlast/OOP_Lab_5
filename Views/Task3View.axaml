@@ -119,7 +119,7 @@
                 </StackPanel>
 
                 <!-- Ставки на числа -->
-                <ScrollViewer Height="300">
+                <ScrollViewer Height="240">
                     <ItemsControl ItemsSource="{Binding SortedTableNumbers}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -128,12 +128,28 @@
                         </ItemsControl.ItemsPanel>
                         
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Button Content="{Binding Number}" Background="{Binding ColorHex}" 
-                                        Foreground="White" Width="50" Height="50" Margin="2" FontSize="18"
-                                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                                        Command="{Binding #Root.DataContext.PlaceStraightBetCommand}" 
-                                        CommandParameter="{Binding Number}"/>
+                            <DataTemplate x:DataType="vm:WheelSectorUI">
+                                <Grid Margin="2">
+                                    <!-- Сама кнопка числа -->
+                                    <Button Content="{Binding Number}" Background="{Binding ColorHex}" 
+                                            Foreground="White" Width="50" Height="50" FontSize="18"
+                                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                            Command="{Binding #Root.DataContext.PlaceStraightBetCommand}" 
+                                            CommandParameter="{Binding Number}"/>
+                                            
+                                    <!-- ФІШКА: З'являється поверх кнопки, якщо є ставка -->
+                                    <Border IsVisible="{Binding HasBet}" 
+                                            Width="34" Height="34" CornerRadius="17" 
+                                            Background="#FFD700" BorderBrush="#B8860B" BorderThickness="2"
+                                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                                            BoxShadow="0 2 5 0 #80000000" IsHitTestVisible="False">
+                                        <!-- IsHitTestVisible="False" дозволяє клікати крізь фішку на саму кнопку -->
+                                        
+                                        <TextBlock Text="{Binding CurrentBetAmount}" 
+                                                   Foreground="Black" FontSize="11" FontWeight="Bold" 
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

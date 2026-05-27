@@ -144,18 +144,29 @@ public partial class Task3ViewModel : ViewModelBase
                 TableBets.Add(bet);
                 Balance = _game.Player.Balance;
                 GameMessage = $"Прийнято: {bet.BetDescription}";
+
+                var tableSector = UIWheelSectors.FirstOrDefault(s => s.Number == number);
+                if (tableSector != null)
+                {
+                    tableSector.CurrentBetAmount += SelectedChip;
+                }
             }
             else GameMessage = "Недостатньо коштів!";
         }
     }
     private void ClearBets()
     {
-        _game.ClearBets(); // Повертає гроші на баланс
+        _game.ClearBets();
         
         var unspunBets = TableBets.Where(b => b.ResultText == "⏳ В грі...").ToList();
         foreach (var bet in unspunBets)
         {
             TableBets.Remove(bet);
+        }
+
+        foreach (var sector in UIWheelSectors)
+        {
+            sector.CurrentBetAmount = 0;
         }
 
         Balance = _game.Player.Balance;
@@ -211,20 +222,22 @@ public partial class Task3ViewModel : ViewModelBase
 
         await AnimateRouletteAsync(targetIndex);
 
-        // ОНОВЛЕНО: Проходимо тільки по ставках ПОТОЧНОГО раунду
         foreach (var bet in _game.CurrentBets)
         {
             decimal payout = bet.CalculatePayout(winningNumber);
-            // Додаємо інформацію про виграшне число до тексту, щоб історія була зрозумілою
             bet.ResultText = payout > 0 ? $"✅ + {payout}$ (Випало {winningNumber.Value})" : $"❌ 0$ (Випало {winningNumber.Value})";
         }
 
-        // Очищає внутрішній стіл рулетки, але наша UI таблиця (TableBets) зберігає їх як історію!
         decimal totalPayout = _game.ResolveBets(winningNumber);
         Balance = _game.Player.Balance;
 
         GameMessage = $"Випало {winningNumber.Value}. " + (totalPayout > 0 ? $"Виграш: {totalPayout}$!" : "Ставки програли.");
         
+        foreach (var sector in UIWheelSectors)
+        {
+            sector.CurrentBetAmount = 0;
+        }
+
         IsSpinning = false;
     }
 
@@ -312,10 +325,28 @@ public class RelayCommand : ICommand
     public void Execute(object? parameter) => _execute(parameter);
     public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
 }
-public class WheelSectorUI
+public class WheelSectorUI : System.ComponentModel.INotifyPropertyChanged
 {
+    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+
     public int Number { get; set; }
     public string ColorHex { get; set; } = string.Empty;
     public double Angle { get; set; }
+    
+    private decimal _currentBetAmount;
+    public decimal CurrentBetAmount
+    {
+        get => _currentBetAmount;
+        set
+        {
+            if (_currentBetAmount != value)
+            {
+                _currentBetAmount = value;
+                PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(CurrentBetAmount)));
+                PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(HasBet)));
+            }
+        }
+    }
+    
+    public bool HasBet => CurrentBetAmount > 0;
 }
-
