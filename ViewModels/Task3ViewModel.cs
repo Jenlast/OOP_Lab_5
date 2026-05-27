@@ -215,6 +215,11 @@ public partial class Task3ViewModel : ViewModelBase
             return;
         }
 
+        foreach (var sector in UIWheelSectors)
+        {
+            sector.IsWinningNumber = false;
+        }
+
         IsSpinning = true;
         GameMessage = "Колесо крутиться...";
 
@@ -238,7 +243,19 @@ public partial class Task3ViewModel : ViewModelBase
             sector.CurrentBetAmount = 0;
         }
 
+        var winningSector = UIWheelSectors.FirstOrDefault(s => s.Number == winningNumber.Value);
+        if (winningSector != null)
+        {
+            winningSector.IsWinningNumber = true;
+        }
+
         IsSpinning = false;
+
+        await Task.Delay(3000);
+        if (winningSector != null)
+        {
+            winningSector.IsWinningNumber = false;
+        }
     }
 
     private async Task AnimateRouletteAsync(int targetIndex)
@@ -344,6 +361,19 @@ public class WheelSectorUI : System.ComponentModel.INotifyPropertyChanged
                 _currentBetAmount = value;
                 PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(CurrentBetAmount)));
                 PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(HasBet)));
+            }
+        }
+    }
+    private bool _isWinningNumber;
+    public bool IsWinningNumber
+    {
+        get => _isWinningNumber;
+        set
+        {
+            if (_isWinningNumber != value)
+            {
+                _isWinningNumber = value;
+                PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(IsWinningNumber)));
             }
         }
     }

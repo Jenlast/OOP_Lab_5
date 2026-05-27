@@ -130,6 +130,16 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:WheelSectorUI">
                                 <Grid Margin="2">
+                                    
+                                    <!-- НЕОНОВА ПІДСВІТКА ВИГРАШУ -->
+                                    <Border IsVisible="{Binding IsWinningNumber}" 
+                                            Background="#00FF00" CornerRadius="4" 
+                                            Margin="-3"> <!-- Margin="-3" робить рамку трохи більшою за кнопку -->
+                                        <Border.Effect>
+                                            <DropShadowEffect BlurRadius="15" Color="#00FF00" OffsetX="0" OffsetY="0"/>
+                                        </Border.Effect>
+                                    </Border>
+
                                     <!-- Сама кнопка числа -->
                                     <Button Content="{Binding Number}" Background="{Binding ColorHex}" 
                                             Foreground="White" Width="50" Height="50" FontSize="18"
@@ -143,7 +153,6 @@
                                             Background="#FFD700" BorderBrush="#B8860B" BorderThickness="2"
                                             HorizontalAlignment="Center" VerticalAlignment="Center"
                                             BoxShadow="0 2 5 0 #80000000" IsHitTestVisible="False">
-                                        <!-- IsHitTestVisible="False" дозволяє клікати крізь фішку на саму кнопку -->
                                         
                                         <TextBlock Text="{Binding CurrentBetAmount}" 
                                                    Foreground="Black" FontSize="11" FontWeight="Bold" 
