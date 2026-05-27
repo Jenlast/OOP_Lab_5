@@ -22,15 +22,17 @@
             <!-- 1. ЛІВА ЧАСТИНА: ТАБЛИЦЯ СТАВОК -->
             <Border Grid.Column="0" Margin="0,0,20,0" Background="#252525" CornerRadius="8" Padding="10">
                 <Grid RowDefinitions="Auto, *">
-                    <TextBlock Text="Ваші ставки на столі" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,0,10" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Ваші ставки" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,0,10" HorizontalAlignment="Center"/>
                     
                     <DataGrid Grid.Row="1" ItemsSource="{Binding TableBets}" AutoGenerateColumns="False" 
-                              IsReadOnly="True" GridLinesVisibility="All" Background="#1E1E1E">
+                              IsReadOnly="True" GridLinesVisibility="Horizontal" Background="#1E1E1E">
                         <DataGrid.Columns>
                             <!-- Сума ставки -->
-                            <DataGridTextColumn Header="Сума ($)" Binding="{Binding Amount}" Width="100"/>
-                            <!-- Опис (Число або Колір) -->
-                            <DataGridTextColumn Header="На що поставлено" Binding="{Binding BetDescription}" Width="*"/>
+                            <DataGridTextColumn Header="$" Binding="{Binding Amount}" Width="60"/>
+                            <!-- Опис -->
+                            <DataGridTextColumn Header="Ставка" Binding="{Binding BetDescription}" Width="90"/>
+                            <!-- Результат -->
+                            <DataGridTextColumn Header="Результат" Binding="{Binding ResultText}" Width=""/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -94,27 +96,26 @@
                 <Border Background="#33000000" Padding="15" CornerRadius="8" BorderBrush="#D4AF37" BorderThickness="1">
                     <StackPanel Orientation="Horizontal" Spacing="15" HorizontalAlignment="Center">
                         <TextBlock Text="Сума ставки ($):" FontSize="18" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
-                        <NumericUpDown Value="{Binding SelectedChip}" 
-                                    Minimum="1" 
-                                    Maximum="10000" 
-                                    Increment="10" 
-                                    FormatString="0" 
-                                    Width="140" 
-                                    FontSize="18" 
-                                    FontWeight="Bold"
-                                    VerticalAlignment="Center"/>
+                        <NumericUpDown Value="{Binding SelectedChip}" Minimum="1" Maximum="10000" Increment="10" FormatString="0" Width="140" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Border>
                                 
-                <!-- Ставки на колір -->
+                <!-- 1. Ставки на колір -->
                 <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
-                    <Button Content="СТАВКА НА ЧЕРВОНЕ" Background="#C62828" Foreground="White" 
-                            Width="180" Height="50" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                            Command="{Binding PlaceColorBetCommand}" CommandParameter="Red"/>
-                    
-                    <Button Content="СТАВКА НА ЧОРНЕ" Background="#151515" Foreground="White" 
-                            Width="180" Height="50" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                            Command="{Binding PlaceColorBetCommand}" CommandParameter="Black"/>
+                    <Button Content="ЧЕРВОНЕ" Background="#C62828" Foreground="White" Width="180" Height="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding PlaceColorBetCommand}" CommandParameter="Red"/>
+                    <Button Content="ЧОРНЕ" Background="#151515" Foreground="White" Width="180" Height="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding PlaceColorBetCommand}" CommandParameter="Black"/>
+                </StackPanel>
+
+                <!-- 2. Парне / Непарне -->
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                    <Button Content="ПАРНЕ (EVEN)" Background="#37474F" Foreground="White" Width="180" Height="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding PlaceEvenOddBetCommand}" CommandParameter="Even"/>
+                    <Button Content="НЕПАРНЕ (ODD)" Background="#37474F" Foreground="White" Width="180" Height="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding PlaceEvenOddBetCommand}" CommandParameter="Odd"/>
+                </StackPanel>
+
+                <!-- 3. Малі / Великі -->
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                    <Button Content="1 ДО 18" Background="#455A64" Foreground="White" Width="180" Height="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding PlaceHighLowBetCommand}" CommandParameter="Low"/>
+                    <Button Content="19 ДО 36" Background="#455A64" Foreground="White" Width="180" Height="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding PlaceHighLowBetCommand}" CommandParameter="High"/>
                 </StackPanel>
 
                 <!-- Ставки на числа -->

@@ -87,6 +87,8 @@ public partial class Task3ViewModel : ViewModelBase
     public ICommand PlaceColorBetCommand { get; }
     public ICommand PlaceStraightBetCommand { get; }
     public ICommand ClearBetsCommand { get; }
+    public ICommand PlaceEvenOddBetCommand { get; }
+    public ICommand PlaceHighLowBetCommand { get; }
 
     public Task3ViewModel()
     {
@@ -97,6 +99,8 @@ public partial class Task3ViewModel : ViewModelBase
         
         PlaceColorBetCommand = new RelayCommand(PlaceColorBet, _ => !IsSpinning);
         PlaceStraightBetCommand = new RelayCommand(PlaceStraightBet, _ => !IsSpinning);
+        PlaceEvenOddBetCommand = new RelayCommand(PlaceEvenOddBet, _ => !IsSpinning);
+        PlaceHighLowBetCommand = new RelayCommand(PlaceHighLowBet, _ => !IsSpinning);
         double angleStep = 360.0 / 37.0;
         for (int i = 0; i < _game.Wheel.Sectors.Count; i++)
         {
@@ -113,6 +117,8 @@ public partial class Task3ViewModel : ViewModelBase
         }
     }
 
+    // --- ЛОГІКА СТАВОК ---
+
     private void PlaceColorBet(object? parameter)
     {
         if (parameter is string colorStr && Enum.TryParse(colorStr, true, out RouletteColor color))
@@ -120,9 +126,9 @@ public partial class Task3ViewModel : ViewModelBase
             var bet = new ColorBet(SelectedChip, color);
             if (_game.PlaceBet(bet))
             {
-                TableBets.Add(bet); // Додаємо в таблицю на екрані
+                TableBets.Add(bet);
                 Balance = _game.Player.Balance;
-                GameMessage = $"Ставка {SelectedChip}$ на {bet.BetDescription} прийнята.";
+                GameMessage = $"Прийнято: {bet.BetDescription}";
             }
             else GameMessage = "Недостатньо коштів!";
         }
@@ -130,26 +136,62 @@ public partial class Task3ViewModel : ViewModelBase
 
     private void PlaceStraightBet(object? parameter)
     {
-        // ВИПРАВЛЕНО: Parameter тепер int, бо кнопка передає число!
         if (parameter is int number) 
         {
             var bet = new StraightBet(SelectedChip, number);
             if (_game.PlaceBet(bet))
             {
-                TableBets.Add(bet); // Додаємо в таблицю на екрані
+                TableBets.Add(bet);
                 Balance = _game.Player.Balance;
-                GameMessage = $"Ставка {SelectedChip}$ на число {number} прийнята.";
+                GameMessage = $"Прийнято: {bet.BetDescription}";
+            }
+            else GameMessage = "Недостатньо коштів!";
+        }
+    }
+    private void ClearBets()
+    {
+        _game.ClearBets(); // Повертає гроші на баланс
+        
+        var unspunBets = TableBets.Where(b => b.ResultText == "⏳ В грі...").ToList();
+        foreach (var bet in unspunBets)
+        {
+            TableBets.Remove(bet);
+        }
+
+        Balance = _game.Player.Balance;
+        GameMessage = "Поточні ставки скасовано.";
+    }
+
+    private void PlaceEvenOddBet(object? parameter)
+    {
+        if (parameter is string type)
+        {
+            bool isEven = type == "Even";
+            var bet = new EvenOddBet(SelectedChip, isEven);
+            if (_game.PlaceBet(bet))
+            {
+                TableBets.Add(bet);
+                Balance = _game.Player.Balance;
+                GameMessage = $"Прийнято: {bet.BetDescription}";
             }
             else GameMessage = "Недостатньо коштів!";
         }
     }
 
-    private void ClearBets()
+    private void PlaceHighLowBet(object? parameter)
     {
-        _game.ClearBets();
-        TableBets.Clear(); // Очищаємо таблицю
-        Balance = _game.Player.Balance;
-        GameMessage = "Ставки скасовано.";
+        if (parameter is string type)
+        {
+            bool isHigh = type == "High";
+            var bet = new HighLowBet(SelectedChip, isHigh);
+            if (_game.PlaceBet(bet))
+            {
+                TableBets.Add(bet);
+                Balance = _game.Player.Balance;
+                GameMessage = $"Прийнято: {bet.BetDescription}";
+            }
+            else GameMessage = "Недостатньо коштів!";
+        }
     }
 
     // --- ФІЗИКА ТА БАГАТОПОТОЧНІСТЬ ---
@@ -163,24 +205,27 @@ public partial class Task3ViewModel : ViewModelBase
         }
 
         IsSpinning = true;
+        GameMessage = "Колесо крутиться...";
 
-        // 1. Отримуємо ЧЕСНЕ виграшне число з нашої Моделі
         var (winningNumber, targetIndex) = _game.Wheel.Spin();
 
-        // 2. Запускаємо фізичну анімацію, яка ГАРАНТОВАНО приземлить кульку на targetIndex
         await AnimateRouletteAsync(targetIndex);
 
-        // 3. Розраховуємо виграші (більше ніяких підмін індексів!)
-        decimal totalPayout = _game.ResolveBets(winningNumber);
+        // ОНОВЛЕНО: Проходимо тільки по ставках ПОТОЧНОГО раунду
+        foreach (var bet in _game.CurrentBets)
+        {
+            decimal payout = bet.CalculatePayout(winningNumber);
+            // Додаємо інформацію про виграшне число до тексту, щоб історія була зрозумілою
+            bet.ResultText = payout > 0 ? $"✅ + {payout}$ (Випало {winningNumber.Value})" : $"❌ 0$ (Випало {winningNumber.Value})";
+        }
 
+        // Очищає внутрішній стіл рулетки, але наша UI таблиця (TableBets) зберігає їх як історію!
+        decimal totalPayout = _game.ResolveBets(winningNumber);
         Balance = _game.Player.Balance;
 
-        GameMessage = totalPayout > 0
-            ? $"Випало {winningNumber.Value} ({winningNumber.Color}). Ви ВИГРАЛИ {totalPayout}$!"
-            : $"Випало {winningNumber.Value} ({winningNumber.Color}). Ставки програли.";
-
+        GameMessage = $"Випало {winningNumber.Value}. " + (totalPayout > 0 ? $"Виграш: {totalPayout}$!" : "Ставки програли.");
+        
         IsSpinning = false;
-        TableBets.Clear();
     }
 
     private async Task AnimateRouletteAsync(int targetIndex)
