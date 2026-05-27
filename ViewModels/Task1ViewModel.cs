@@ -10,6 +10,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OOP_Lab5.Models;
+using OOP_Lab5.Services;
 
 namespace OOP_Lab5.ViewModels;
 
@@ -18,8 +19,8 @@ public partial class Task1ViewModel : ViewModelBase
     public ObservableCollection<HorseModel> Horses { get; set; } = new();
     public ObservableCollection<HorseModel> LeaderboardHorses { get; set; } = new();
     
-    [ObservableProperty] private int _balance = 1000;
-    [ObservableProperty] private int _betAmount = 100;
+    public BankService Bank => BankService.Instance;
+    [ObservableProperty] private decimal _betAmount = 100; 
     [ObservableProperty] private HorseModel? _selectedHorseForBet;
     [ObservableProperty] private bool _isSimulationRunning;
     [ObservableProperty] private int _horseCount = 5;
@@ -28,7 +29,6 @@ public partial class Task1ViewModel : ViewModelBase
 
     [ObservableProperty] private double _finishLineViewPositionX = 660; 
     
-    // НОВА ВЛАСТИВІСТЬ ДЛЯ ТЕКСТУ ПОМИЛКИ
     [ObservableProperty] private string _errorMessage = string.Empty;
     
     private const double TrackLength = 3000;
@@ -41,7 +41,6 @@ public partial class Task1ViewModel : ViewModelBase
         InitializeHorses(HorseCount); 
     }
 
-    // Автоматично прибираємо помилку, якщо гравець змінив кількість коней
     partial void OnHorseCountChanged(int value)
     {
         if (!IsSimulationRunning)
@@ -52,9 +51,8 @@ public partial class Task1ViewModel : ViewModelBase
         }
     }
 
-    // Автоматично прибираємо помилку, якщо гравець обрав коня або змінив ставку
     partial void OnSelectedHorseForBetChanged(HorseModel? value) => ErrorMessage = string.Empty;
-    partial void OnBetAmountChanged(int value) => ErrorMessage = string.Empty;
+    partial void OnBetAmountChanged(decimal value) => ErrorMessage = string.Empty;
 
     private void LoadImages()
     {
@@ -106,21 +104,19 @@ public partial class Task1ViewModel : ViewModelBase
     {
         if (IsSimulationRunning) return;
 
-        ErrorMessage = string.Empty; // Очищаємо старі помилки перед перевіркою
+        ErrorMessage = string.Empty; 
 
         int selectedIndex = SelectedHorseForBet != null ? Horses.IndexOf(SelectedHorseForBet) : -1;
         
-        // ПЕРЕВІРКА 1: Чи обраний кінь
         if (selectedIndex == -1)
         {
             ErrorMessage = "Оберіть фаворита для ставки!";
             return;
         }
 
-        // ПЕРЕВІРКА 2: Чи вистачає грошей
-        if (Balance < BetAmount)
+        if (!Bank.TrySpendMoney(BetAmount))
         {
-            ErrorMessage = "Недостатньо коштів на балансі!";
+            ErrorMessage = "Недостатньо коштів на балансі або візьміть кредит!";
             return;
         }
 
@@ -128,7 +124,6 @@ public partial class Task1ViewModel : ViewModelBase
         SelectedHorseForBet = Horses[selectedIndex];
         var betHorse = SelectedHorseForBet;
 
-        Balance -= BetAmount;
         IsSimulationRunning = true;
 
         var rnd = new Random();
@@ -198,7 +193,6 @@ public partial class Task1ViewModel : ViewModelBase
                     .ThenByDescending(h => h.PositionX)      
                     .ToList();
 
-                // НОВИЙ НАДІЙНИЙ КОД:
                 LeaderboardHorses.Clear();
                 foreach (var h in currentOrder)
                 {
@@ -212,7 +206,10 @@ public partial class Task1ViewModel : ViewModelBase
         sw.Stop();
         IsSimulationRunning = false;
         
-        if (betHorse.Rank == 1) Balance += (int)(BetAmount * betHorse.Coefficient);
+        if (betHorse.Rank == 1) 
+        {
+            Bank.AddMoney(BetAmount * (decimal)betHorse.Coefficient);
+        }
 
         var rand = new Random();
         foreach (var h in Horses)
@@ -228,7 +225,7 @@ public partial class Task1ViewModel : ViewModelBase
         CameraHorseIndex++;
         if (CameraHorseIndex >= HorseCount) 
         {
-            CameraHorseIndex = -1; // Повертаємось на загальний вигляд
+            CameraHorseIndex = -1; 
         }
 
         CameraButtonText = CameraHorseIndex == -1 

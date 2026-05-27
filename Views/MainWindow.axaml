@@ -8,20 +8,33 @@
     
     <Grid RowDefinitions="Auto, *">
         
-        <!-- Панель навігації (Показується тільки ВСЕРЕДИНІ завдань) -->
-        <Border Grid.Row="0" Background="#1E1E1E" Padding="10" IsVisible="{Binding IsBackButtonVisible}">
-            <Button Command="{Binding GoHomeCommand}" 
-                    Background="Transparent" 
-                    Cursor="Hand">
-                <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock Text="←" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
-                    <TextBlock Text="На головну" FontSize="16" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+        <Border Grid.Row="0" Background="#1E1E1E" Padding="15" BorderBrush="#333" BorderThickness="0,0,0,2">
+            <Grid ColumnDefinitions="Auto, *, Auto">
+                
+                <Button Grid.Column="0" Command="{Binding GoHomeCommand}" IsVisible="{Binding IsBackButtonVisible}" Background="Transparent" Cursor="Hand">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="←" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                        <TextBlock Text="На головну" FontSize="16" Foreground="White" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20">
+                    <TextBlock Text="Баланс:" FontSize="20" Foreground="White" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Bank.Balance, StringFormat='{}{0:0.00} $'}" FontSize="24" FontWeight="Heavy" Foreground="#4CAF50" VerticalAlignment="Center"/>
+                    
+                    <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding Bank.HasDebt}">
+                        <TextBlock Text="Борг:" FontSize="20" Foreground="LightGray" VerticalAlignment="Center" Margin="30,0,0,0"/>
+                        <TextBlock Text="{Binding Bank.Debt, StringFormat='-{0:0.00} $'}" FontSize="24" FontWeight="Heavy" Foreground="#FF5252" VerticalAlignment="Center"/>
+                    </StackPanel>
                 </StackPanel>
-            </Button>
+
+                <Button Grid.Column="2" Command="{Binding GoToBankCommand}" 
+                        Content="🏦 БАНК" Background="#FF9800" Foreground="Black" FontWeight="Bold" 
+                        Padding="20,10" CornerRadius="8" Cursor="Hand"/>
+
+            </Grid>
         </Border>
         
-        <!-- Вміст (Або меню з картками, або саме завдання) -->
         <TransitioningContentControl Grid.Row="1" Content="{Binding CurrentViewModel}" />
-        
     </Grid>
 </Window>

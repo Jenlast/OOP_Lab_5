@@ -4,7 +4,7 @@ namespace OOP_Lab5.Models;
 
 public class Player
 {
-    public decimal Balance { get; set; } = 1000m; // Стартовий баланс
+    public decimal Balance { get; set; } = 1000m;
 }
 
 public class RouletteGame
@@ -19,16 +19,14 @@ public class RouletteGame
     public bool PlaceBet(Bet bet)
     {
         if (Player.Balance < bet.Amount)
-            return false; // Недостатньо грошей
-
-        Player.Balance -= bet.Amount; // Гроші знімаються при ставці
+            return false; 
+        Player.Balance -= bet.Amount; 
         _currentBets.Add(bet);
         return true;
     }
 
     public void ClearBets()
     {
-        // Якщо гравець передумав до спіну - повертаємо гроші
         foreach (var bet in _currentBets)
         {
             Player.Balance += bet.Amount;
@@ -36,7 +34,6 @@ public class RouletteGame
         _currentBets.Clear();
     }
 
-    // Викликається ПІСЛЯ того, як кулька фізично зупинилася на екрані
     public decimal ResolveBets(RouletteNumber winningNumber)
     {
         decimal totalPayout = 0;
@@ -46,9 +43,9 @@ public class RouletteGame
             totalPayout += bet.CalculatePayout(winningNumber);
         }
 
-        Player.Balance += totalPayout; // Нараховуємо виграш
-        _currentBets.Clear(); // Очищаємо стіл для наступного раунду
+        Player.Balance += totalPayout;
+        _currentBets.Clear(); 
 
-        return totalPayout; // Повертаємо суму виграшу для повідомлення на екрані
+        return totalPayout; 
     }
 }

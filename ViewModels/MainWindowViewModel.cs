@@ -1,10 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using OOP_Lab5.Services;
 
 namespace OOP_Lab5.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
+    public BankService Bank => BankService.Instance;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsBackButtonVisible))]
     private ViewModelBase _currentViewModel;
@@ -16,14 +19,11 @@ public partial class MainWindowViewModel : ViewModelBase
         _currentViewModel = new HomeViewModel(NavigateTo);
     }
 
-    private void NavigateTo(ViewModelBase viewModel)
-    {
-        CurrentViewModel = viewModel;
-    }
+    private void NavigateTo(ViewModelBase viewModel) => CurrentViewModel = viewModel;
 
     [RelayCommand]
-    private void GoHome()
-    {
-        CurrentViewModel = new HomeViewModel(NavigateTo);
-    }
+    private void GoHome() => CurrentViewModel = new HomeViewModel(NavigateTo);
+
+    [RelayCommand]
+    private void GoToBank() => CurrentViewModel = new BankViewModel();
 }

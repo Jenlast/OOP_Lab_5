@@ -8,18 +8,15 @@
 
     <Grid RowDefinitions="Auto, *">
         
-        <!-- ВЕРХНЯ ПАНЕЛЬ УПРАВЛІННЯ -->
         <Border Grid.Row="0" Background="#1E1E1E" Padding="20" BorderBrush="#333" BorderThickness="0,0,0,2">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20">
                 <TextBlock Text="БАЛАНС:" FontSize="24" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding Balance, StringFormat='{}{0:0.00} $'}" FontSize="24" FontWeight="Heavy" Foreground="#4CAF50" VerticalAlignment="Center"/>
                 
                 <TextBlock Text="Ставка:" FontSize="18" Foreground="LightGray" VerticalAlignment="Center" Margin="20,0,0,0"/>
                 <NumericUpDown Value="{Binding BetAmount}" Minimum="1" Maximum="1000" Increment="5" FormatString="0" Width="100" VerticalAlignment="Center"/>
                 
-                <!-- НОВЕ: ВПАДНЕ МЕНЮ ДЛЯ ВИБОРУ РИЗИКУ -->
                 <TextBlock Text="Ризик:" FontSize="18" Foreground="LightGray" VerticalAlignment="Center" Margin="10,0,0,0"/>
-                <ComboBox SelectedIndex="{Binding SelectedRiskIndex}" Width="120" VerticalAlignment="Center" Cursor="Hand">
+                <ComboBox SelectedIndex="{Binding SelectedRiskIndex}" IsEnabled="{Binding CanChangeRisk}" Width="120" VerticalAlignment="Center" Cursor="Hand">
                     <ComboBoxItem>Низький</ComboBoxItem>
                     <ComboBoxItem>Середній</ComboBoxItem>
                     <ComboBoxItem>Високий</ComboBoxItem>
@@ -32,19 +29,15 @@
             </StackPanel>
         </Border>
 
-        <!-- ІГРОВЕ ПОЛЕ PLINKO -->
         <Viewbox Grid.Row="1" Stretch="Uniform" Margin="20">
-            <!-- Замість Canvas використовуємо Grid для шарів, а Canvas буде всередині кожного ItemsControl -->
             <Grid Width="800" Height="700">
                 
-                <!-- 1. МАЛЮЄМО КІЛОЧКИ (ЦВЯШКИ) -->
                 <ItemsControl ItemsSource="{Binding Pegs}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate><Canvas/></ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     
                     <ItemsControl.Styles>
-                        <!-- ПРАВИЛЬНЕ ПОЗИЦІОНУВАННЯ ДЛЯ AVALONIA 11 -->
                         <Style Selector="ContentPresenter" x:DataType="models:PlinkoPeg">
                             <Setter Property="Canvas.Left" Value="{Binding X}"/>
                             <Setter Property="Canvas.Top" Value="{Binding Y}"/>
@@ -58,7 +51,6 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <!-- 2. МАЛЮЄМО СЛОТИ З МНОЖНИКАМИ ВНИЗУ -->
                 <ItemsControl ItemsSource="{Binding Slots}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate><Canvas/></ItemsPanelTemplate>
@@ -82,7 +74,6 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <!-- 3. МАЛЮЄМО КУЛЬКИ (Оновлюються анімацією) -->
                 <ItemsControl ItemsSource="{Binding Balls}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate><Canvas/></ItemsPanelTemplate>

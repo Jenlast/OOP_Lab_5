@@ -2,7 +2,7 @@
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
             xmlns:local="using:OOP_Lab5"
             x:Class="OOP_Lab5.App"
-            RequestedThemeVariant="Dark"> <!-- Я поставив Dark, бо у вас темна тема -->
+            RequestedThemeVariant="Dark">
            
    <Application.DataTemplates>
        <local:ViewLocator/>
@@ -10,7 +10,6 @@
 
    <Application.Styles>
        <FluentTheme />
-       <!-- ОСЬ ЦЕЙ РЯДОК МАЛЮЄ ТАБЛИЦЮ: -->
        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
    </Application.Styles>
 </Application>

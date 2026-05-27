@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Avalonia.Threading;
 using OOP_Lab5.Models;
+using OOP_Lab5.Services;
 
 namespace OOP_Lab5.ViewModels;
 
@@ -14,14 +15,8 @@ public partial class Task3ViewModel : ViewModelBase
 {
     private readonly RouletteGame _game = new();
 
-    // --- ВЛАСТИВОСТІ ДЛЯ UI ---
     public ObservableCollection<Bet> TableBets { get; } = new();
-    private decimal _balance;
-    public decimal Balance
-    {
-        get => _balance;
-        set => SetProperty(ref _balance, value);
-    }
+    public BankService Bank => BankService.Instance;
 
     private string _gameMessage = "Робіть ваші ставки!";
     public string GameMessage
@@ -37,7 +32,7 @@ public partial class Task3ViewModel : ViewModelBase
         set
         {
             SetProperty(ref _isSpinning, value);
-            OnPropertyChanged(nameof(CanPlaceBet)); // Оновлюємо стан кнопок
+            OnPropertyChanged(nameof(CanPlaceBet)); 
         }
     }
 
@@ -50,7 +45,6 @@ public partial class Task3ViewModel : ViewModelBase
         set => SetProperty(ref _selectedChip, value);
     }
 
-    // --- ВЛАСТИВОСТІ ДЛЯ ФІЗИКИ ТА АНІМАЦІЇ ---
 
     private double _wheelAngle;
     public double WheelAngle
@@ -66,7 +60,7 @@ public partial class Task3ViewModel : ViewModelBase
         set => SetProperty(ref _ballAngle, value);
     }
 
-    private double _ballRadius = 200; // Відстань від центру (140 - зовнішнє коло, 90 - на числах)
+    private double _ballRadius = 200; 
     public double BallRadius
     {
         get => _ballRadius;
@@ -82,7 +76,6 @@ public partial class Task3ViewModel : ViewModelBase
     private double _ballY = 25;
     public double BallY { get => _ballY; set => SetProperty(ref _ballY, value); }
 
-    // --- КОМАНДИ ---
     public ICommand SpinCommand { get; }
     public ICommand PlaceColorBetCommand { get; }
     public ICommand PlaceStraightBetCommand { get; }
@@ -92,7 +85,6 @@ public partial class Task3ViewModel : ViewModelBase
 
     public Task3ViewModel()
     {
-        Balance = _game.Player.Balance;
 
         SpinCommand = new RelayCommand(async _ => await SpinAsync(), _ => !IsSpinning);
         ClearBetsCommand = new RelayCommand(_ => ClearBets(), _ => !IsSpinning);
@@ -117,20 +109,19 @@ public partial class Task3ViewModel : ViewModelBase
         }
     }
 
-    // --- ЛОГІКА СТАВОК ---
-
     private void PlaceColorBet(object? parameter)
     {
         if (parameter is string colorStr && Enum.TryParse(colorStr, true, out RouletteColor color))
         {
             var bet = new ColorBet(SelectedChip, color);
-            if (_game.PlaceBet(bet))
+            if (Bank.TrySpendMoney(SelectedChip))
             {
+                _game.Player.Balance += SelectedChip;
+                _game.PlaceBet(bet);
                 TableBets.Add(bet);
-                Balance = _game.Player.Balance;
                 GameMessage = $"Прийнято: {bet.BetDescription}";
             }
-            else GameMessage = "Недостатньо коштів!";
+            else GameMessage = "Недостатньо коштів у банку!";
         }
     }
 
@@ -139,19 +130,14 @@ public partial class Task3ViewModel : ViewModelBase
         if (parameter is int number) 
         {
             var bet = new StraightBet(SelectedChip, number);
-            if (_game.PlaceBet(bet))
+            if (Bank.TrySpendMoney(SelectedChip))
             {
+                _game.Player.Balance += SelectedChip; 
+                _game.PlaceBet(bet);
                 TableBets.Add(bet);
-                Balance = _game.Player.Balance;
                 GameMessage = $"Прийнято: {bet.BetDescription}";
-
-                var tableSector = UIWheelSectors.FirstOrDefault(s => s.Number == number);
-                if (tableSector != null)
-                {
-                    tableSector.CurrentBetAmount += SelectedChip;
-                }
             }
-            else GameMessage = "Недостатньо коштів!";
+            else GameMessage = "Недостатньо коштів у банку!";
         }
     }
     private void ClearBets()
@@ -162,15 +148,12 @@ public partial class Task3ViewModel : ViewModelBase
         foreach (var bet in unspunBets)
         {
             TableBets.Remove(bet);
+            Bank.AddMoney(bet.Amount);
         }
 
-        foreach (var sector in UIWheelSectors)
-        {
-            sector.CurrentBetAmount = 0;
-        }
+        foreach (var sector in UIWheelSectors) sector.CurrentBetAmount = 0;
 
-        Balance = _game.Player.Balance;
-        GameMessage = "Поточні ставки скасовано.";
+        GameMessage = "Поточні ставки скасовано. Гроші повернуто.";
     }
 
     private void PlaceEvenOddBet(object? parameter)
@@ -179,13 +162,14 @@ public partial class Task3ViewModel : ViewModelBase
         {
             bool isEven = type == "Even";
             var bet = new EvenOddBet(SelectedChip, isEven);
-            if (_game.PlaceBet(bet))
+            if (Bank.TrySpendMoney(SelectedChip))
             {
+                _game.Player.Balance += SelectedChip;
+                _game.PlaceBet(bet);
                 TableBets.Add(bet);
-                Balance = _game.Player.Balance;
                 GameMessage = $"Прийнято: {bet.BetDescription}";
             }
-            else GameMessage = "Недостатньо коштів!";
+            else GameMessage = "Недостатньо коштів у банку!";
         }
     }
 
@@ -195,17 +179,17 @@ public partial class Task3ViewModel : ViewModelBase
         {
             bool isHigh = type == "High";
             var bet = new HighLowBet(SelectedChip, isHigh);
-            if (_game.PlaceBet(bet))
+            if (Bank.TrySpendMoney(SelectedChip))
             {
+                _game.Player.Balance += SelectedChip;
+                _game.PlaceBet(bet);
                 TableBets.Add(bet);
-                Balance = _game.Player.Balance;
                 GameMessage = $"Прийнято: {bet.BetDescription}";
             }
-            else GameMessage = "Недостатньо коштів!";
+            else GameMessage = "Недостатньо коштів у банку!";
         }
     }
 
-    // --- ФІЗИКА ТА БАГАТОПОТОЧНІСТЬ ---
 
     private async Task SpinAsync()
     {
@@ -234,7 +218,10 @@ public partial class Task3ViewModel : ViewModelBase
         }
 
         decimal totalPayout = _game.ResolveBets(winningNumber);
-        Balance = _game.Player.Balance;
+        if (totalPayout > 0)
+        {
+            Bank.AddMoney(totalPayout); 
+        }
 
         GameMessage = $"Випало {winningNumber.Value}. " + (totalPayout > 0 ? $"Виграш: {totalPayout}$!" : "Ставки програли.");
         
@@ -266,30 +253,24 @@ public partial class Task3ViewModel : ViewModelBase
         int totalFrames = 300; 
         double sectorAngle = 360.0 / 37.0;
 
-        // Крутимо колесо на 3 повних оберти назад
         double endWheelAngle = startWheelAngle - (3 * 360);
         
-        // ІДЕАЛЬНА МАТЕМАТИКА (без зсувів на половину сектора!)
         double finalPocketAngle = endWheelAngle + (targetIndex * sectorAngle);
 
-        // Рахуємо шлях кульки
         double ballDistance = (finalPocketAngle - startBallAngle) % 360;
         if (ballDistance < 0) ballDistance += 360;
 
-        // Кулька робить 5 обертів + відстань до комірки
         double endBallAngle = startBallAngle + ballDistance + (5 * 360);
 
         for (int i = 0; i <= totalFrames; i++)
         {
             double t = (double)i / totalFrames; 
             
-            // Плавне гальмування
             double ease = 1.0 - Math.Pow(1.0 - t, 3);
 
             double currentWheelAngle = startWheelAngle + (endWheelAngle - startWheelAngle) * ease;
             double currentBallAngle = startBallAngle + (endBallAngle - startBallAngle) * ease;
 
-            // Радіус падіння
             double currentRadius = 200; 
             if (t > 0.5) 
             {
@@ -298,7 +279,6 @@ public partial class Task3ViewModel : ViewModelBase
                 currentRadius = 200 - (70 * dropEase); 
             }
 
-            // Розрахунок координат
             double renderAngle = NormalizeAngle(currentBallAngle);
             double rad = renderAngle * Math.PI / 180.0;
             
@@ -325,7 +305,6 @@ public partial class Task3ViewModel : ViewModelBase
     }
 }
 
-// Допоміжний клас для команд, якщо у тебе немає CommunityToolkit
 public class RelayCommand : ICommand
 {
     private readonly Action<object?> _execute;

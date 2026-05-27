@@ -9,17 +9,13 @@
     
     <Grid RowDefinitions="Auto, *, Auto" Margin="20">
         
-        <!-- ВЕРХНЯ ПАНЕЛЬ: БАЛАНС І ПОВІДОМЛЕННЯ -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="20" HorizontalAlignment="Center">
             <TextBlock Text="Баланс: $" FontSize="24" Foreground="White" FontWeight="Bold"/>
-            <TextBlock Text="{Binding Balance}" FontSize="24" Foreground="#4CAF50" FontWeight="Bold"/>
             <TextBlock Text="{Binding GameMessage}" FontSize="20" Foreground="Yellow" Margin="30,0,0,0" VerticalAlignment="Center"/>
         </StackPanel>
 
-        <!-- ІГРОВА ЗОНА (3 Колонки: Таблиця ставок, Колесо, Кнопки) -->
         <Grid Grid.Row="1" ColumnDefinitions="280, 480, *" Margin="0,30">
             
-            <!-- 1. ЛІВА ЧАСТИНА: ТАБЛИЦЯ СТАВОК -->
             <Border Grid.Column="0" Margin="0,0,20,0" Background="#252525" CornerRadius="8" Padding="10">
                 <Grid RowDefinitions="Auto, *">
                     <TextBlock Text="Ваші ставки" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,0,10" HorizontalAlignment="Center"/>
@@ -27,21 +23,16 @@
                     <DataGrid Grid.Row="1" ItemsSource="{Binding TableBets}" AutoGenerateColumns="False" 
                               IsReadOnly="True" GridLinesVisibility="Horizontal" Background="#1E1E1E">
                         <DataGrid.Columns>
-                            <!-- Сума ставки -->
                             <DataGridTextColumn Header="$" Binding="{Binding Amount}" Width="60"/>
-                            <!-- Опис -->
                             <DataGridTextColumn Header="Ставка" Binding="{Binding BetDescription}" Width="90"/>
-                            <!-- Результат -->
                             <DataGridTextColumn Header="Результат" Binding="{Binding ResultText}" Width=""/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
             </Border>
 
-            <!-- 2. ЦЕНТР: КОЛЕСО РУЛЕТКИ (450x450) -->
             <Grid Grid.Column="1" Width="450" Height="450" HorizontalAlignment="Center" VerticalAlignment="Center">
                 
-                <!-- Самі сектори колеса -->
                 <ItemsControl ItemsSource="{Binding UIWheelSectors}" Width="450" Height="450" RenderTransformOrigin="50%,50%">
                     <ItemsControl.RenderTransform>
                         <RotateTransform Angle="{Binding WheelAngle}" />
@@ -72,12 +63,10 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <!-- Центральний декоративний круг, який закриває стики секторів -->
                 <Ellipse Width="260" Height="260" Fill="#2A2A2A" Stroke="#D4AF37" StrokeThickness="6" 
                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 <Ellipse Width="60" Height="60" Fill="#D4AF37" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
-                <!-- КУЛЬКА (Світиться неоном) -->
                 <Canvas Width="450" Height="450">
                     <Ellipse Width="16" Height="16" Fill="#FFFF00" Stroke="White" StrokeThickness="2"
                             Canvas.Left="{Binding BallX}" 
@@ -89,10 +78,8 @@
                 </Canvas>
             </Grid>
 
-            <!-- 3. ПРАВА ЧАСТИНА: СТІЛ ДЛЯ СТАВОК -->
             <StackPanel Grid.Column="2" Margin="20,0,0,0" Spacing="20">
                 
-                <!-- Панель вводу ставки -->
                 <Border Background="#33000000" Padding="15" CornerRadius="8" BorderBrush="#D4AF37" BorderThickness="1">
                     <StackPanel Orientation="Horizontal" Spacing="15" HorizontalAlignment="Center">
                         <TextBlock Text="Сума ставки ($):" FontSize="18" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
@@ -100,25 +87,21 @@
                     </StackPanel>
                 </Border>
                                 
-                <!-- 1. Ставки на колір -->
                 <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
                     <Button Content="ЧЕРВОНЕ" Background="#C62828" Foreground="White" Width="180" Height="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding PlaceColorBetCommand}" CommandParameter="Red"/>
                     <Button Content="ЧОРНЕ" Background="#151515" Foreground="White" Width="180" Height="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding PlaceColorBetCommand}" CommandParameter="Black"/>
                 </StackPanel>
 
-                <!-- 2. Парне / Непарне -->
                 <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
                     <Button Content="ПАРНЕ (EVEN)" Background="#37474F" Foreground="White" Width="180" Height="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding PlaceEvenOddBetCommand}" CommandParameter="Even"/>
                     <Button Content="НЕПАРНЕ (ODD)" Background="#37474F" Foreground="White" Width="180" Height="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding PlaceEvenOddBetCommand}" CommandParameter="Odd"/>
                 </StackPanel>
 
-                <!-- 3. Малі / Великі -->
                 <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
                     <Button Content="1 ДО 18" Background="#455A64" Foreground="White" Width="180" Height="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding PlaceHighLowBetCommand}" CommandParameter="Low"/>
                     <Button Content="19 ДО 36" Background="#455A64" Foreground="White" Width="180" Height="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding PlaceHighLowBetCommand}" CommandParameter="High"/>
                 </StackPanel>
 
-                <!-- Ставки на числа -->
                 <ScrollViewer Height="240">
                     <ItemsControl ItemsSource="{Binding SortedTableNumbers}">
                         <ItemsControl.ItemsPanel>
@@ -131,23 +114,20 @@
                             <DataTemplate x:DataType="vm:WheelSectorUI">
                                 <Grid Margin="2">
                                     
-                                    <!-- НЕОНОВА ПІДСВІТКА ВИГРАШУ -->
                                     <Border IsVisible="{Binding IsWinningNumber}" 
                                             Background="#00FF00" CornerRadius="4" 
-                                            Margin="-3"> <!-- Margin="-3" робить рамку трохи більшою за кнопку -->
+                                            Margin="-3"> 
                                         <Border.Effect>
                                             <DropShadowEffect BlurRadius="15" Color="#00FF00" OffsetX="0" OffsetY="0"/>
                                         </Border.Effect>
                                     </Border>
 
-                                    <!-- Сама кнопка числа -->
                                     <Button Content="{Binding Number}" Background="{Binding ColorHex}" 
                                             Foreground="White" Width="50" Height="50" FontSize="18"
                                             HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                             Command="{Binding #Root.DataContext.PlaceStraightBetCommand}" 
                                             CommandParameter="{Binding Number}"/>
                                             
-                                    <!-- ФІШКА: З'являється поверх кнопки, якщо є ставка -->
                                     <Border IsVisible="{Binding HasBet}" 
                                             Width="34" Height="34" CornerRadius="17" 
                                             Background="#FFD700" BorderBrush="#B8860B" BorderThickness="2"
@@ -166,7 +146,6 @@
             </StackPanel>
         </Grid>
 
-        <!-- НИЖНЯ ПАНЕЛЬ: КЕРУВАННЯ ГРОЮ -->
         <Grid Grid.Row="2" ColumnDefinitions="*, Auto, Auto">
             
             <Button Grid.Column="1" Content="СКАСУВАТИ СТАВКИ" Background="#E64A19" Foreground="White" 

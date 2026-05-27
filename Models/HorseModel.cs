@@ -23,7 +23,6 @@ public partial class HorseModel : ObservableObject
     [ObservableProperty] private TimeSpan _finishTime;
     [ObservableProperty] private bool _isFinished;
 
-    // НОВА ВЛАСТИВІСТЬ: Для живого відображення часу в таблиці
     [ObservableProperty] private string _liveTimeDisplay = "0.000 сек";
 
     public void Move(Random rnd)

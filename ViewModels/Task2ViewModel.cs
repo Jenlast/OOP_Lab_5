@@ -23,7 +23,7 @@ public partial class Task2ViewModel : ViewModelBase
    [ObservableProperty] private bool _useMultiThreading = true;
    [ObservableProperty] private int _selectedMetricIndex = 0;
    [ObservableProperty] private string _performanceInfo = "";
-   [ObservableProperty] private int _pointsToAddCount = 50; // За замовчуванням пропонуємо 50
+   [ObservableProperty] private int _pointsToAddCount = 50;
    [ObservableProperty] private string _errorMessage = string.Empty;
 
    partial void OnPointsToAddCountChanged(int value)
@@ -39,7 +39,6 @@ public partial class Task2ViewModel : ViewModelBase
    [RelayCommand]
    private void AddRandomPoints()
    {
-       // 1. Перевіряємо ліміти
        if (PointsToAddCount < 1)
        {
            ErrorMessage = "Помилка: Кількість точок має бути більшою за 0!";
@@ -51,10 +50,8 @@ public partial class Task2ViewModel : ViewModelBase
            return;
        }
 
-       // 2. Якщо все добре - очищаємо помилку
        ErrorMessage = string.Empty;
 
-       // 3. Генеруємо вказану кількість точок
        var rnd = new Random();
        for (int i = 0; i < PointsToAddCount; i++)
        {
@@ -66,7 +63,6 @@ public partial class Task2ViewModel : ViewModelBase
            });
        }
       
-       // 4. Перемальовуємо
        GenerateVoronoi();
    }
 
@@ -83,13 +79,10 @@ public partial class Task2ViewModel : ViewModelBase
    {
        if (Points.Count == 0) return;
 
-       // Рахуємо, скільки точок треба видалити (наприклад, 30%). Якщо точок мало, видаляємо хоча б 1.
        int countToRemove = Math.Max(1, (int)(Points.Count * 0.3));
       
-       // Щоб випадково не видалити взагалі всі точки:
        if (countToRemove >= Points.Count) countToRemove = Points.Count - 1;
 
-       // Linq-магія: сортуємо за площею (від найменшої), беремо потрібну кількість
        var toRemove = Points.OrderBy(p => p.AreaPixels).Take(countToRemove).ToList();
 
        foreach (var p in toRemove)
@@ -97,7 +90,6 @@ public partial class Task2ViewModel : ViewModelBase
            Points.Remove(p);
        }
 
-       // Перемальовуємо екран
        GenerateVoronoi();
        PerformanceInfo = $"Видалено {countToRemove} найменших локусів";
    }
@@ -114,18 +106,15 @@ public partial class Task2ViewModel : ViewModelBase
        var sw = Stopwatch.StartNew();
        var newImage = new WriteableBitmap(new PixelSize(Width, Height), new Vector(96, 96), PixelFormat.Bgra8888);
 
-       // Створюємо масив лічильників (по одному на кожну точку)
        int[] pixelCounts = new int[Points.Count];
 
        using (var buf = newImage.Lock())
        {
-           // Передаємо масив pixelCounts у ProcessRow
            if (UseMultiThreading) Parallel.For(0, Height, y => ProcessRow(y, Width, buf, metric, pixelCounts));
            else for (int y = 0; y < Height; y++) ProcessRow(y, Width, buf, metric, pixelCounts);
            DrawPoints(buf);
        }
       
-       // Після того, як весь екран намальовано, записуємо результати в точки
        for (int i = 0; i < Points.Count; i++)
        {
            Points[i].AreaPixels = pixelCounts[i];
@@ -148,9 +137,8 @@ public partial class Task2ViewModel : ViewModelBase
        {
            double minDist = double.MaxValue;
            Color closestColor = Colors.Gray;
-           int closestIndex = -1; // Зберігаємо індекс найближчої точки
+           int closestIndex = -1;
 
-           // Проходимо циклом for, щоб мати доступ до індексу [i]
            for (int i = 0; i < Points.Count; i++)
            {
                double dist = metric.Calculate(x, y, Points[i].X, Points[i].Y);
@@ -158,11 +146,10 @@ public partial class Task2ViewModel : ViewModelBase
                {
                    minDist = dist;
                    closestColor = Points[i].RegionColor;
-                   closestIndex = i; // Запам'ятовуємо, чий це піксель
+                   closestIndex = i; 
                }
            }
           
-           // Безпечно додаємо +1 до лічильника пікселів для знайденої точки
            if (closestIndex != -1)
            {
                Interlocked.Increment(ref pixelCounts[closestIndex]);

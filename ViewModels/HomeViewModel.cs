@@ -6,7 +6,6 @@ namespace OOP_Lab5.ViewModels;
 
 public partial class HomeViewModel : ViewModelBase
 {
-    // Дія (Action), яка буде передана з MainWindow, щоб перемикати екрани
     private readonly Action<ViewModelBase> _navigateAction;
 
     public HomeViewModel(Action<ViewModelBase> navigateAction)

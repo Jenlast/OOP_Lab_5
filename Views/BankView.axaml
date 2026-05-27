@@ -1,0 +1,103 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:OOP_Lab5.ViewModels"
+             x:Class="OOP_Lab5.Views.BankView"
+             x:DataType="vm:BankViewModel"
+             Background="#121212">
+
+    <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="30">
+            
+            <TextBlock Text="🏦 Відділення Банку Казино" FontSize="36" FontWeight="Heavy" Foreground="White" HorizontalAlignment="Center"/>
+            <TextBlock Text="Увага: Усі кредити видаються під 20% комісії!" FontSize="16" Foreground="#FF5252" HorizontalAlignment="Center"/>
+
+            <Border Background="#1E1E1E" Padding="40" CornerRadius="15" BorderBrush="#333" BorderThickness="2" BoxShadow="0 10 20 0 #40000000">
+                <StackPanel Spacing="40">
+                    
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="60">
+                        <StackPanel>
+                            <TextBlock Text="Ваш баланс:" FontSize="18" Foreground="LightGray" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding Bank.Balance, StringFormat='{}{0:0.00} $'}" FontSize="32" FontWeight="Bold" Foreground="#4CAF50" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                        
+                        <StackPanel IsVisible="{Binding Bank.HasDebt}">
+                            <TextBlock Text="Ваш борг:" FontSize="18" Foreground="LightGray" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding Bank.Debt, StringFormat='-{0:0.00} $'}" FontSize="32" FontWeight="Bold" Foreground="#FF5252" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Rectangle Height="1" Fill="#333"/>
+
+                    <Grid ColumnDefinitions="*, *" Width="600">
+                        
+                        <StackPanel Grid.Column="0" Spacing="15" Margin="0,0,20,0">
+                            <TextBlock Text="💳 ВЗЯТИ КРЕДИТ" FontSize="20" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+                            
+                            <WrapPanel HorizontalAlignment="Center">
+                                <WrapPanel.Styles>
+                                    <Style Selector="Button">
+                                        <Setter Property="Width" Value="120"/>
+                                        <Setter Property="Height" Value="50"/>
+                                        <Setter Property="Margin" Value="5"/>
+                                        <Setter Property="FontSize" Value="18"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                        <Setter Property="Background" Value="#2c2c2c"/>
+                                        <Setter Property="Foreground" Value="#FF9800"/>
+                                    </Style>
+                                    <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                        <Setter Property="Background" Value="#FF9800"/>
+                                        <Setter Property="TextBlock.Foreground" Value="Black"/>
+                                    </Style>
+                                </WrapPanel.Styles>
+
+                                <Button Content="+ 5 $" Command="{Binding TakeLoanCommand}" CommandParameter="5"/>
+                                <Button Content="+ 10 $" Command="{Binding TakeLoanCommand}" CommandParameter="10"/>
+                                <Button Content="+ 50 $" Command="{Binding TakeLoanCommand}" CommandParameter="50"/>
+                                <Button Content="+ 100 $" Command="{Binding TakeLoanCommand}" CommandParameter="100"/>
+                                <Button Content="+ 200 $" Command="{Binding TakeLoanCommand}" CommandParameter="200"/>
+                                <Button Content="+ 1000 $" Command="{Binding TakeLoanCommand}" CommandParameter="1000"/>
+                            </WrapPanel>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="15" Margin="20,0,0,0">
+                            <TextBlock Text="💸 ПОГАСИТИ БОРГ" FontSize="20" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+                            
+                            <WrapPanel HorizontalAlignment="Center">
+                                <WrapPanel.Styles>
+                                    <Style Selector="Button">
+                                        <Setter Property="Width" Value="120"/>
+                                        <Setter Property="Height" Value="50"/>
+                                        <Setter Property="Margin" Value="5"/>
+                                        <Setter Property="FontSize" Value="18"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                        <Setter Property="Background" Value="#2c2c2c"/>
+                                        <Setter Property="Foreground" Value="#4CAF50"/> 
+                                    </Style>
+                                    <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                        <Setter Property="Background" Value="#4CAF50"/>
+                                        <Setter Property="TextBlock.Foreground" Value="White"/>
+                                    </Style>
+                                </WrapPanel.Styles>
+
+                                <Button Content="- 5 $" Command="{Binding RepayLoanCommand}" CommandParameter="5"/>
+                                <Button Content="- 10 $" Command="{Binding RepayLoanCommand}" CommandParameter="10"/>
+                                <Button Content="- 50 $" Command="{Binding RepayLoanCommand}" CommandParameter="50"/>
+                                <Button Content="- 100 $" Command="{Binding RepayLoanCommand}" CommandParameter="100"/>
+                                <Button Content="- 200 $" Command="{Binding RepayLoanCommand}" CommandParameter="200"/>
+                                <Button Content="- 1000 $" Command="{Binding RepayLoanCommand}" CommandParameter="1000"/>
+                            </WrapPanel>
+                        </StackPanel>
+                        
+                    </Grid>
+                    
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </Grid>
+</UserControl>
