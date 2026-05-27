@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:OOP_Lab5.ViewModels"
+             xmlns:models="using:OOP_Lab5.Models"
              x:Class="OOP_Lab5.Views.Task3View"
              x:DataType="vm:Task3ViewModel"
              x:Name="Root"
@@ -15,22 +16,37 @@
             <TextBlock Text="{Binding GameMessage}" FontSize="20" Foreground="Yellow" Margin="30,0,0,0" VerticalAlignment="Center"/>
         </StackPanel>
 
-        <!-- ІГРОВА ЗОНА -->
-        <Grid Grid.Row="1" ColumnDefinitions="480, *" Margin="0,30">
+        <!-- ІГРОВА ЗОНА (3 Колонки: Таблиця ставок, Колесо, Кнопки) -->
+        <Grid Grid.Row="1" ColumnDefinitions="280, 480, *" Margin="0,30">
             
-            <!-- ЛІВА ЧАСТИНА: КОЛЕСО РУЛЕТКИ (450x450) -->
-            <Grid Grid.Column="0" Width="450" Height="450" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <!-- 1. ЛІВА ЧАСТИНА: ТАБЛИЦЯ СТАВОК -->
+            <Border Grid.Column="0" Margin="0,0,20,0" Background="#252525" CornerRadius="8" Padding="10">
+                <Grid RowDefinitions="Auto, *">
+                    <TextBlock Text="Ваші ставки на столі" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,0,10" HorizontalAlignment="Center"/>
+                    
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding TableBets}" AutoGenerateColumns="False" 
+                              IsReadOnly="True" GridLinesVisibility="All" Background="#1E1E1E">
+                        <DataGrid.Columns>
+                            <!-- Сума ставки -->
+                            <DataGridTextColumn Header="Сума ($)" Binding="{Binding Amount}" Width="100"/>
+                            <!-- Опис (Число або Колір) -->
+                            <DataGridTextColumn Header="На що поставлено" Binding="{Binding BetDescription}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <!-- 2. ЦЕНТР: КОЛЕСО РУЛЕТКИ (450x450) -->
+            <Grid Grid.Column="1" Width="450" Height="450" HorizontalAlignment="Center" VerticalAlignment="Center">
                 
                 <!-- Самі сектори колеса -->
                 <ItemsControl ItemsSource="{Binding UIWheelSectors}" Width="450" Height="450" RenderTransformOrigin="50%,50%">
-                    <!-- Обертання всього колеса суворо по центру -->
                     <ItemsControl.RenderTransform>
                         <RotateTransform Angle="{Binding WheelAngle}" />
                     </ItemsControl.RenderTransform>
                     
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <!-- ЗАМІНА Canvas НА Grid ДЛЯ ІДЕАЛЬНОГО ЦЕНТРУВАННЯ -->
                             <Grid Width="450" Height="450" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
@@ -42,7 +58,6 @@
                                     <RotateTransform Angle="{Binding Angle}" />
                                 </Grid.RenderTransform>
                                 
-                                <!-- Сектор збільшено: Ширина 38, Висота 225 -->
                                 <Border Background="{Binding ColorHex}" Width="38" Height="225" 
                                         VerticalAlignment="Top" HorizontalAlignment="Center" 
                                         BorderBrush="#D4AF37" BorderThickness="1" CornerRadius="2">
@@ -60,7 +75,7 @@
                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 <Ellipse Width="60" Height="60" Fill="#D4AF37" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
-                <!-- КУЛЬКА (Збільшена до 16px) -->
+                <!-- КУЛЬКА (Світиться неоном) -->
                 <Canvas Width="450" Height="450">
                     <Ellipse Width="16" Height="16" Fill="#FFFF00" Stroke="White" StrokeThickness="2"
                             Canvas.Left="{Binding BallX}" 
@@ -72,8 +87,9 @@
                 </Canvas>
             </Grid>
 
-            <!-- ПРАВА ЧАСТИНА: СТІЛ ДЛЯ СТАВОК (Без змін) -->
-            <StackPanel Grid.Column="1" Margin="40,0,0,0" Spacing="20">
+            <!-- 3. ПРАВА ЧАСТИНА: СТІЛ ДЛЯ СТАВОК -->
+            <StackPanel Grid.Column="2" Margin="20,0,0,0" Spacing="20">
+                
                 <!-- Панель вводу ставки -->
                 <Border Background="#33000000" Padding="15" CornerRadius="8" BorderBrush="#D4AF37" BorderThickness="1">
                     <StackPanel Orientation="Horizontal" Spacing="15" HorizontalAlignment="Center">

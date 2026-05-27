@@ -15,7 +15,7 @@ public partial class Task3ViewModel : ViewModelBase
     private readonly RouletteGame _game = new();
 
     // --- ВЛАСТИВОСТІ ДЛЯ UI ---
-
+    public ObservableCollection<Bet> TableBets { get; } = new();
     private decimal _balance;
     public decimal Balance
     {
@@ -113,16 +113,16 @@ public partial class Task3ViewModel : ViewModelBase
         }
     }
 
-    // --- ЛОГІКА СТАВОК ---
-
     private void PlaceColorBet(object? parameter)
     {
         if (parameter is string colorStr && Enum.TryParse(colorStr, true, out RouletteColor color))
         {
-            if (_game.PlaceBet(new ColorBet(SelectedChip, color)))
+            var bet = new ColorBet(SelectedChip, color);
+            if (_game.PlaceBet(bet))
             {
+                TableBets.Add(bet); // Додаємо в таблицю на екрані
                 Balance = _game.Player.Balance;
-                GameMessage = $"Ставка {SelectedChip} на {color} прийнята.";
+                GameMessage = $"Ставка {SelectedChip}$ на {bet.BetDescription} прийнята.";
             }
             else GameMessage = "Недостатньо коштів!";
         }
@@ -130,12 +130,15 @@ public partial class Task3ViewModel : ViewModelBase
 
     private void PlaceStraightBet(object? parameter)
     {
-        if (parameter is string numStr && int.TryParse(numStr, out int number))
+        // ВИПРАВЛЕНО: Parameter тепер int, бо кнопка передає число!
+        if (parameter is int number) 
         {
-            if (_game.PlaceBet(new StraightBet(SelectedChip, number)))
+            var bet = new StraightBet(SelectedChip, number);
+            if (_game.PlaceBet(bet))
             {
+                TableBets.Add(bet); // Додаємо в таблицю на екрані
                 Balance = _game.Player.Balance;
-                GameMessage = $"Ставка {SelectedChip} на число {number} прийнята.";
+                GameMessage = $"Ставка {SelectedChip}$ на число {number} прийнята.";
             }
             else GameMessage = "Недостатньо коштів!";
         }
@@ -144,6 +147,7 @@ public partial class Task3ViewModel : ViewModelBase
     private void ClearBets()
     {
         _game.ClearBets();
+        TableBets.Clear(); // Очищаємо таблицю
         Balance = _game.Player.Balance;
         GameMessage = "Ставки скасовано.";
     }
@@ -176,6 +180,7 @@ public partial class Task3ViewModel : ViewModelBase
             : $"Випало {winningNumber.Value} ({winningNumber.Color}). Ставки програли.";
 
         IsSpinning = false;
+        TableBets.Clear();
     }
 
     private async Task AnimateRouletteAsync(int targetIndex)
