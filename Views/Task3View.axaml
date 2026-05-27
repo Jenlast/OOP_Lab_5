@@ -74,8 +74,22 @@
 
             <!-- ПРАВА ЧАСТИНА: СТІЛ ДЛЯ СТАВОК (Без змін) -->
             <StackPanel Grid.Column="1" Margin="40,0,0,0" Spacing="20">
-                <TextBlock Text="СТІЛ СТАВОК (Фішка: 10$)" FontSize="20" Foreground="White" HorizontalAlignment="Center"/>
-                
+                <!-- Панель вводу ставки -->
+                <Border Background="#33000000" Padding="15" CornerRadius="8" BorderBrush="#D4AF37" BorderThickness="1">
+                    <StackPanel Orientation="Horizontal" Spacing="15" HorizontalAlignment="Center">
+                        <TextBlock Text="Сума ставки ($):" FontSize="18" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                        <NumericUpDown Value="{Binding SelectedChip}" 
+                                    Minimum="1" 
+                                    Maximum="10000" 
+                                    Increment="10" 
+                                    FormatString="0" 
+                                    Width="140" 
+                                    FontSize="18" 
+                                    FontWeight="Bold"
+                                    VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                                
                 <!-- Ставки на колір -->
                 <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
                     <Button Content="СТАВКА НА ЧЕРВОНЕ" Background="#C62828" Foreground="White" 

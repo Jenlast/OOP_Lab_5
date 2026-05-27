@@ -43,7 +43,12 @@ public partial class Task3ViewModel : ViewModelBase
 
     public bool CanPlaceBet => !IsSpinning;
 
-    public decimal SelectedChip { get; set; } = 10m; // Стандартна ставка
+    private decimal _selectedChip = 10m;
+    public decimal SelectedChip
+    {
+        get => _selectedChip;
+        set => SetProperty(ref _selectedChip, value);
+    }
 
     // --- ВЛАСТИВОСТІ ДЛЯ ФІЗИКИ ТА АНІМАЦІЇ ---
 
@@ -181,35 +186,42 @@ public partial class Task3ViewModel : ViewModelBase
         int totalFrames = 300; 
         double sectorAngle = 360.0 / 37.0;
 
+        // Крутимо колесо на 3 повних оберти назад
         double endWheelAngle = startWheelAngle - (3 * 360);
-        double finalPocketAngle = endWheelAngle + (targetIndex * sectorAngle) + (sectorAngle / 2.0);
+        
+        // ІДЕАЛЬНА МАТЕМАТИКА (без зсувів на половину сектора!)
+        double finalPocketAngle = endWheelAngle + (targetIndex * sectorAngle);
 
+        // Рахуємо шлях кульки
         double ballDistance = (finalPocketAngle - startBallAngle) % 360;
         if (ballDistance < 0) ballDistance += 360;
 
+        // Кулька робить 5 обертів + відстань до комірки
         double endBallAngle = startBallAngle + ballDistance + (5 * 360);
 
         for (int i = 0; i <= totalFrames; i++)
         {
             double t = (double)i / totalFrames; 
+            
+            // Плавне гальмування
             double ease = 1.0 - Math.Pow(1.0 - t, 3);
 
             double currentWheelAngle = startWheelAngle + (endWheelAngle - startWheelAngle) * ease;
             double currentBallAngle = startBallAngle + (endBallAngle - startBallAngle) * ease;
 
-            // НОВИЙ РАДІУС ПАДІННЯ
-            double currentRadius = 200; // Крутиться по краю
+            // Радіус падіння
+            double currentRadius = 200; 
             if (t > 0.5) 
             {
                 double dropProgress = (t - 0.5) / 0.5; 
                 double dropEase = dropProgress * dropProgress * (3 - 2 * dropProgress);
-                currentRadius = 200 - (70 * dropEase); // Падає з 200 до 130 (на цифри)
+                currentRadius = 200 - (70 * dropEase); 
             }
 
+            // Розрахунок координат
             double renderAngle = NormalizeAngle(currentBallAngle);
             double rad = renderAngle * Math.PI / 180.0;
             
-            // НОВИЙ ЦЕНТР: 225. Віднімаємо 8, бо ширина кульки 16 (16 / 2 = 8)
             double bx = 225 + currentRadius * Math.Sin(rad) - 8;
             double by = 225 - currentRadius * Math.Cos(rad) - 8;
 
