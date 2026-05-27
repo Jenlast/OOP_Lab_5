@@ -16,39 +16,39 @@
         </StackPanel>
 
         <!-- ІГРОВА ЗОНА -->
-        <Grid Grid.Row="1" ColumnDefinitions="Auto, *" Margin="0,30">
+        <Grid Grid.Row="1" ColumnDefinitions="480, *" Margin="0,30">
             
-            <!-- ЛІВА ЧАСТИНА: КОЛЕСО РУЛЕТКИ (300x300) -->
-            <Grid Grid.Column="0" Width="300" Height="300">
+            <!-- ЛІВА ЧАСТИНА: КОЛЕСО РУЛЕТКИ (450x450) -->
+            <Grid Grid.Column="0" Width="450" Height="450" HorizontalAlignment="Center" VerticalAlignment="Center">
                 
                 <!-- Самі сектори колеса -->
-                <ItemsControl ItemsSource="{Binding UIWheelSectors}">
-                    <!-- Обертання всього колеса -->
+                <ItemsControl ItemsSource="{Binding UIWheelSectors}" Width="450" Height="450" RenderTransformOrigin="50%,50%">
+                    <!-- Обертання всього колеса суворо по центру -->
                     <ItemsControl.RenderTransform>
                         <RotateTransform Angle="{Binding WheelAngle}" />
                     </ItemsControl.RenderTransform>
                     
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <Canvas Width="300" Height="300" />
+                            <!-- ЗАМІНА Canvas НА Grid ДЛЯ ІДЕАЛЬНОГО ЦЕНТРУВАННЯ -->
+                            <Grid Width="450" Height="450" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <!-- Кожен сектор розвертається на свій кут -->
-                            <Grid Width="300" Height="300">
+                            <Grid Width="450" Height="450" RenderTransformOrigin="50%,50%">
                                 <Grid.RenderTransform>
                                     <RotateTransform Angle="{Binding Angle}" />
                                 </Grid.RenderTransform>
                                 
-                                <!-- Імітація сектора колеса -->
-                                <Border Background="{Binding ColorHex}" Width="26" Height="150" 
+                                <!-- Сектор збільшено: Ширина 38, Висота 225 -->
+                                <Border Background="{Binding ColorHex}" Width="38" Height="225" 
                                         VerticalAlignment="Top" HorizontalAlignment="Center" 
                                         BorderBrush="#D4AF37" BorderThickness="1" CornerRadius="2">
                                     <TextBlock Text="{Binding Number}" Foreground="White" 
-                                               HorizontalAlignment="Center" Margin="0,5,0,0"
-                                               FontSize="14" FontWeight="Bold"/>
+                                               HorizontalAlignment="Center" Margin="0,15,0,0"
+                                               FontSize="16" FontWeight="Bold"/>
                                 </Border>
                             </Grid>
                         </DataTemplate>
@@ -56,24 +56,23 @@
                 </ItemsControl>
 
                 <!-- Центральний декоративний круг, який закриває стики секторів -->
-                <Ellipse Width="180" Height="180" Fill="#2A2A2A" Stroke="#D4AF37" StrokeThickness="4" 
+                <Ellipse Width="260" Height="260" Fill="#2A2A2A" Stroke="#D4AF37" StrokeThickness="6" 
                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                <Ellipse Width="40" Height="40" Fill="#D4AF37" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Ellipse Width="60" Height="60" Fill="#D4AF37" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
-                <!-- КУЛЬКА (Збільшена і світиться) -->
-                <Canvas Width="300" Height="300">
-                    <Ellipse Width="12" Height="12" Fill="#FFFF00" Stroke="White" StrokeThickness="2"
+                <!-- КУЛЬКА (Збільшена до 16px) -->
+                <Canvas Width="450" Height="450">
+                    <Ellipse Width="16" Height="16" Fill="#FFFF00" Stroke="White" StrokeThickness="2"
                             Canvas.Left="{Binding BallX}" 
                             Canvas.Top="{Binding BallY}">
-                        <!-- Робимо ефект неонового світіння замість звичайної тіні -->
                         <Ellipse.Effect>
-                            <DropShadowEffect BlurRadius="10" Color="#FFFF00" OffsetX="0" OffsetY="0"/>
+                            <DropShadowEffect BlurRadius="12" Color="#FFFF00" OffsetX="0" OffsetY="0"/>
                         </Ellipse.Effect>
                     </Ellipse>
                 </Canvas>
             </Grid>
 
-            <!-- ПРАВА ЧАСТИНА: СТІЛ ДЛЯ СТАВОК -->
+            <!-- ПРАВА ЧАСТИНА: СТІЛ ДЛЯ СТАВОК (Без змін) -->
             <StackPanel Grid.Column="1" Margin="40,0,0,0" Spacing="20">
                 <TextBlock Text="СТІЛ СТАВОК (Фішка: 10$)" FontSize="20" Foreground="White" HorizontalAlignment="Center"/>
                 
@@ -88,8 +87,8 @@
                             Command="{Binding PlaceColorBetCommand}" CommandParameter="Black"/>
                 </StackPanel>
 
-                <!-- Ставки на числа (Плитка від 0 до 36) -->
-                <ScrollViewer Height="250">
+                <!-- Ставки на числа -->
+                <ScrollViewer Height="300">
                     <ItemsControl ItemsSource="{Binding SortedTableNumbers}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -99,7 +98,6 @@
                         
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <!-- Магія прив'язки: Звертаємось до DataContext головного екрану (#Root) -->
                                 <Button Content="{Binding Number}" Background="{Binding ColorHex}" 
                                         Foreground="White" Width="50" Height="50" Margin="2" FontSize="18"
                                         HorizontalContentAlignment="Center" VerticalContentAlignment="Center"

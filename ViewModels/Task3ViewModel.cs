@@ -61,7 +61,7 @@ public partial class Task3ViewModel : ViewModelBase
         set => SetProperty(ref _ballAngle, value);
     }
 
-    private double _ballRadius = 140; // Відстань від центру (140 - зовнішнє коло, 90 - на числах)
+    private double _ballRadius = 200; // Відстань від центру (140 - зовнішнє коло, 90 - на числах)
     public double BallRadius
     {
         get => _ballRadius;
@@ -71,10 +71,10 @@ public partial class Task3ViewModel : ViewModelBase
     public ObservableCollection<WheelSectorUI> UIWheelSectors { get; } = new();
     public System.Collections.Generic.IEnumerable<WheelSectorUI> SortedTableNumbers => UIWheelSectors.OrderBy(x => x.Number);
 
-    private double _ballX = 150;
+    private double _ballX = 225;
     public double BallX { get => _ballX; set => SetProperty(ref _ballX, value); }
 
-    private double _ballY = 10;
+    private double _ballY = 25;
     public double BallY { get => _ballY; set => SetProperty(ref _ballY, value); }
 
     // --- КОМАНДИ ---
@@ -155,81 +155,63 @@ public partial class Task3ViewModel : ViewModelBase
 
         IsSpinning = true;
 
+        // 1. Отримуємо ЧЕСНЕ виграшне число з нашої Моделі
         var (winningNumber, targetIndex) = _game.Wheel.Spin();
 
+        // 2. Запускаємо фізичну анімацію, яка ГАРАНТОВАНО приземлить кульку на targetIndex
         await AnimateRouletteAsync(targetIndex);
 
-        // 🎯 ВИПРАВЛЕНЕ ВИЗНАЧЕННЯ РЕЗУЛЬТАТУ (НЕ З MODEL!)
-        double sectorAngle = 360.0 / 37.0;
-
-        double finalAngle = NormalizeAngle(WheelAngle + BallAngle);
-
-        int correctedIndex = GetWinningIndex(finalAngle, sectorAngle);
-
-        var correctedNumber = _game.Wheel.Sectors[correctedIndex];
-
-        decimal totalPayout = _game.ResolveBets(correctedNumber);
+        // 3. Розраховуємо виграші (більше ніяких підмін індексів!)
+        decimal totalPayout = _game.ResolveBets(winningNumber);
 
         Balance = _game.Player.Balance;
 
         GameMessage = totalPayout > 0
-            ? $"Випало {correctedNumber.Value} ({correctedNumber.Color}). Ви ВИГРАЛИ {totalPayout}!"
-            : $"Випало {correctedNumber.Value} ({correctedNumber.Color}). Ставки програли.";
+            ? $"Випало {winningNumber.Value} ({winningNumber.Color}). Ви ВИГРАЛИ {totalPayout}$!"
+            : $"Випало {winningNumber.Value} ({winningNumber.Color}). Ставки програли.";
 
         IsSpinning = false;
     }
 
     private async Task AnimateRouletteAsync(int targetIndex)
     {
-        double currentWheelAngle = WheelAngle;
-        double currentBallAngle = BallAngle;
-        double currentRadius = 140;
+        double startWheelAngle = WheelAngle;
+        double startBallAngle = BallAngle;
 
-        double wheelSpeed = -3.0;
-        double ballVelocity = 5.0;
-
-        int totalFrames = 250;
+        int totalFrames = 300; 
         double sectorAngle = 360.0 / 37.0;
 
-        double finalWheelAngle = currentWheelAngle + wheelSpeed * totalFrames;
+        double endWheelAngle = startWheelAngle - (3 * 360);
+        double finalPocketAngle = endWheelAngle + (targetIndex * sectorAngle) + (sectorAngle / 2.0);
 
-        // 🎯 ФІКСОВАНА ЦІЛЬ (центр сектора!)
-        double fixedTargetAngle = finalWheelAngle + (targetIndex * sectorAngle);
+        double ballDistance = (finalPocketAngle - startBallAngle) % 360;
+        if (ballDistance < 0) ballDistance += 360;
 
-        for (int i = 0; i < totalFrames; i++)
+        double endBallAngle = startBallAngle + ballDistance + (5 * 360);
+
+        for (int i = 0; i <= totalFrames; i++)
         {
-            double progress = (double)i / totalFrames;
-            double speedMultiplier = 1.0 - Math.Pow(progress, 2);
+            double t = (double)i / totalFrames; 
+            double ease = 1.0 - Math.Pow(1.0 - t, 3);
 
-            currentWheelAngle += wheelSpeed * speedMultiplier;
+            double currentWheelAngle = startWheelAngle + (endWheelAngle - startWheelAngle) * ease;
+            double currentBallAngle = startBallAngle + (endBallAngle - startBallAngle) * ease;
 
-            ballVelocity *= 0.985;
-            currentBallAngle += ballVelocity * speedMultiplier;
-
-            if (progress > 0.65)
+            // НОВИЙ РАДІУС ПАДІННЯ
+            double currentRadius = 200; // Крутиться по краю
+            if (t > 0.5) 
             {
-                currentRadius = Math.Max(90, currentRadius - 1.2);
-
-                double diff = fixedTargetAngle - currentBallAngle;
-
-                diff = (diff + 540) % 360 - 180;
-
-                ballVelocity += diff * 0.012;
-                ballVelocity *= 0.92;
+                double dropProgress = (t - 0.5) / 0.5; 
+                double dropEase = dropProgress * dropProgress * (3 - 2 * dropProgress);
+                currentRadius = 200 - (70 * dropEase); // Падає з 200 до 130 (на цифри)
             }
 
-            if (progress > 0.90)
-                ballVelocity *= 0.85;
-
-            if (progress > 0.97)
-                ballVelocity = 0;
-
             double renderAngle = NormalizeAngle(currentBallAngle);
-
             double rad = renderAngle * Math.PI / 180.0;
-
-            double bx = 150 + currentRadius * Math.Sin(rad) - 6;
-            double by = 150 - currentRadius * Math.Cos(rad) - 6;
+            
+            // НОВИЙ ЦЕНТР: 225. Віднімаємо 8, бо ширина кульки 16 (16 / 2 = 8)
+            double bx = 225 + currentRadius * Math.Sin(rad) - 8;
+            double by = 225 - currentRadius * Math.Cos(rad) - 8;
 
             Dispatcher.UIThread.Post(() =>
             {
@@ -240,7 +222,7 @@ public partial class Task3ViewModel : ViewModelBase
                 BallY = by;
             });
 
-            await Task.Delay(15);
+            await Task.Delay(16);
         }
     }
     private double NormalizeAngle(double a)
@@ -248,13 +230,6 @@ public partial class Task3ViewModel : ViewModelBase
         a %= 360;
         if (a < 0) a += 360;
         return a;
-    }
-
-    private int GetWinningIndex(double angle, double sectorAngle)
-    {
-        angle = NormalizeAngle(angle + sectorAngle / 2.0);
-        int index = (int)(angle / sectorAngle);
-        return index % 37;
     }
 }
 
